@@ -1,0 +1,76 @@
+{
+  "algorithms": [
+    {
+      "name": "binary_search",
+      "category": "Searching",
+      "description": "Searches for a target value within a sorted array with O(log n) time complexity.",
+      "code": "def binary_search(arr: list, target: int) -> int:\n    \"\"\"Find target index in sorted array, or return -1 if not found.\"\"\"\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1",
+      "test": "assert binary_search([1, 3, 5, 7, 9], 5) == 2\nassert binary_search([1, 3, 5, 7, 9], 6) == -1"
+    },
+    {
+      "name": "quick_sort",
+      "category": "Sorting",
+      "description": "In-place divide-and-conquer sorting algorithm with average O(n log n) time complexity.",
+      "code": "def quick_sort(arr: list) -> list:\n    \"\"\"Sort an array using the QuickSort algorithm.\"\"\"\n    if len(arr) <= 1:\n        return arr\n    pivot = arr[len(arr) // 2]\n    left = [x for x in arr if x < pivot]\n    middle = [x for x in arr if x == pivot]\n    right = [x for x in arr if x > pivot]\n    return quick_sort(left) + middle + quick_sort(right)",
+      "test": "assert quick_sort([3, 6, 8, 10, 1, 2, 1]) == [1, 1, 2, 3, 6, 8, 10]"
+    },
+    {
+      "name": "merge_sort",
+      "category": "Sorting",
+      "description": "Stable divide-and-conquer sorting algorithm with guaranteed O(n log n) time complexity.",
+      "code": "def merge_sort(arr: list) -> list:\n    \"\"\"Sort an array using the MergeSort algorithm.\"\"\"\n    if len(arr) <= 1:\n        return arr\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n    \n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result",
+      "test": "assert merge_sort([12, 11, 13, 5, 6, 7]) == [5, 6, 7, 11, 12, 13]"
+    },
+    {
+      "name": "bfs_graph",
+      "category": "Graph",
+      "description": "Breadth-First Search for traversing or searching graph/tree data structures.",
+      "code": "from collections import deque\nfrom typing import Dict, List\n\ndef bfs(graph: Dict[str, List[str]], start_node: str) -> List[str]:\n    \"\"\"Traverse a graph level by level starting from start_node.\"\"\"\n    visited = set([start_node])\n    queue = deque([start_node])\n    traversal = []\n    \n    while queue:\n        node = queue.popleft()\n        traversal.append(node)\n        for neighbor in graph.get(node, []):\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append(neighbor)\n    return traversal",
+      "test": "g = {'A': ['B', 'C'], 'B': ['D'], 'C': ['E'], 'D': [], 'E': []}\nassert bfs(g, 'A') == ['A', 'B', 'C', 'D', 'E']"
+    },
+    {
+      "name": "dfs_graph",
+      "category": "Graph",
+      "description": "Depth-First Search for exploring all branches of a graph or tree.",
+      "code": "from typing import Dict, List, Set\n\ndef dfs(graph: Dict[str, List[str]], start_node: str, visited: Set[str] = None) -> List[str]:\n    \"\"\"Explore a graph deeply using Depth-First Search.\"\"\"\n    if visited is None:\n        visited = set()\n    visited.add(start_node)\n    traversal = [start_node]\n    \n    for neighbor in graph.get(start_node, []):\n        if neighbor not in visited:\n            traversal.extend(dfs(graph, neighbor, visited))\n    return traversal",
+      "test": "g = {'A': ['B', 'C'], 'B': ['D'], 'C': [], 'D': []}\nassert dfs(g, 'A') == ['A', 'B', 'D', 'C']"
+    },
+    {
+      "name": "lru_cache",
+      "category": "Data Structures",
+      "description": "Least Recently Used (LRU) Cache data structure with O(1) get and put operations.",
+      "code": "from collections import OrderedDict\nfrom typing import Any, Optional\n\nclass LRUCache:\n    \"\"\"LRU Cache with fixed capacity.\"\"\"\n    def __init__(self, capacity: int):\n        self.capacity = max(1, capacity)\n        self.cache = OrderedDict()\n\n    def get(self, key: str) -> Optional[Any]:\n        if key not in self.cache:\n            return None\n        self.cache.move_to_end(key)\n        return self.cache[key]\n\n    def put(self, key: str, value: Any) -> None:\n        if key in self.cache:\n            self.cache.move_to_end(key)\n        self.cache[key] = value\n        if len(self.cache) > self.capacity:\n            self.cache.popitem(last=False)",
+      "test": "cache = LRUCache(2)\ncache.put('a', 1)\ncache.put('b', 2)\nassert cache.get('a') == 1\ncache.put('c', 3)\nassert cache.get('b') is None\nassert cache.get('c') == 3"
+    },
+    {
+      "name": "trie_prefix_tree",
+      "category": "Data Structures",
+      "description": "Trie (Prefix Tree) for efficient word and prefix searching.",
+      "code": "class TrieNode:\n    def __init__(self):\n        self.children = {}\n        self.is_end_of_word = False\n\nclass Trie:\n    \"\"\"Prefix tree for efficient string lookups.\"\"\"\n    def __init__(self):\n        self.root = TrieNode()\n\n    def insert(self, word: str) -> None:\n        node = self.root\n        for char in word:\n            if char not in node.children:\n                node.children[char] = TrieNode()\n            node = node.children[char]\n        node.is_end_of_word = True\n\n    def search(self, word: str) -> bool:\n        node = self.root\n        for char in word:\n            if char not in node.children:\n                return False\n            node = node.children[char]\n        return node.is_end_of_word\n\n    def starts_with(self, prefix: str) -> bool:\n        node = self.root\n        for char in prefix:\n            if char not in node.children:\n                return False\n            node = node.children[char]\n        return True",
+      "test": "trie = Trie()\ntrie.insert('apple')\nassert trie.search('apple') is True\nassert trie.search('app') is False\nassert trie.starts_with('app') is True"
+    }
+  ],
+  "system_patterns": [
+    {
+      "name": "safe_json_io",
+      "category": "File I/O",
+      "description": "Safe atomic reading and writing of JSON files with error handling.",
+      "code": "import json\nimport os\nfrom typing import Any, Optional\n\ndef read_json_file(file_path: str, default: Any = None) -> Any:\n    \"\"\"Safely load a JSON file with fallback default.\"\"\"\n    if not os.path.exists(file_path):\n        return default\n    try:\n        with open(file_path, 'r', encoding='utf-8') as f:\n            return json.load(f)\n    except Exception as e:\n        print(f\"Warning: Failed to read {file_path}: {e}\")\n        return default\n\ndef write_json_file(file_path: str, data: Any, indent: int = 2) -> bool:\n    \"\"\"Safely write data to a JSON file.\"\"\"\n    try:\n        os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)\n        with open(file_path, 'w', encoding='utf-8') as f:\n            json.dump(data, f, indent=indent, ensure_ascii=False)\n        return True\n    except Exception as e:\n        print(f\"Error writing {file_path}: {e}\")\n        return False",
+      "test": "data = {'test': 123}\nwrite_json_file('test_temp.json', data)\nassert read_json_file('test_temp.json') == data\nos.remove('test_temp.json')"
+    },
+    {
+      "name": "retry_decorator",
+      "category": "Reliability",
+      "description": "Decorator for automatically retrying a function on exception with exponential backoff.",
+      "code": "import time\nimport functools\nfrom typing import Callable, Any\n\ndef retry(max_attempts: int = 3, delay_seconds: float = 0.5, backoff_factor: float = 2.0):\n    \"\"\"Decorator that retries a function upon exception with exponential backoff.\"\"\"\n    def decorator(func: Callable) -> Callable:\n        @functools.wraps(func)\n        def wrapper(*args, **kwargs) -> Any:\n            current_delay = delay_seconds\n            last_exception = None\n            for attempt in range(1, max_attempts + 1):\n                try:\n                    return func(*args, **kwargs)\n                except Exception as e:\n                    last_exception = e\n                    if attempt == max_attempts:\n                        raise last_exception\n                    time.sleep(current_delay)\n                    current_delay *= backoff_factor\n        return wrapper\n    return decorator",
+      "test": "attempts = 0\n@retry(max_attempts=3, delay_seconds=0.01)\ndef flaky():\n    nonlocal attempts\n    attempts += 1\n    if attempts < 2:\n        raise ValueError('Fail')\n    return 'Success'\nassert flaky() == 'Success'\nassert attempts == 2"
+    },
+    {
+      "name": "sqlite_kv_store",
+      "category": "Database",
+      "description": "Lightweight, thread-safe Key-Value store backed by local SQLite.",
+      "code": "import sqlite3\nimport json\nfrom typing import Any, Optional\n\nclass SQLiteKVStore:\n    \"\"\"Thread-safe Key-Value store using SQLite.\"\"\"\n    def __init__(self, db_path: str = ':memory:'):\n        self.db_path = db_path\n        self._init_db()\n\n    def _init_db(self):\n        with sqlite3.connect(self.db_path) as conn:\n            conn.execute(\"\"\"\n                CREATE TABLE IF NOT EXISTS kv_store (\n                    key TEXT PRIMARY KEY,\n                    value TEXT NOT NULL,\n                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n                )\n            \"\"\")\n            conn.commit()\n\n    def set(self, key: str, value: Any) -> None:\n        val_str = json.dumps(value)\n        with sqlite3.connect(self.db_path) as conn:\n            conn.execute(\"INSERT OR REPLACE INTO kv_store (key, value) VALUES (?, ?)\", (key, val_str))\n            conn.commit()\n\n    def get(self, key: str, default: Any = None) -> Any:\n        with sqlite3.connect(self.db_path) as conn:\n            cursor = conn.execute(\"SELECT value FROM kv_store WHERE key = ?\", (key,))\n            row = cursor.fetchone()\n            if row:\n                return json.loads(row[0])\n            return default",
+      "test": "kv = SQLiteKVStore()\nkv.set('user', {'name': 'Abhinav', 'role': 'Admin'})\nassert kv.get('user')['name'] == 'Abhinav'\nassert kv.get('unknown', 404) == 404"
+    }
+  ]
+}

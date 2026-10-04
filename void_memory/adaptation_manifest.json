@@ -1,0 +1,125 @@
+{
+  "queue": [
+    {
+      "candidate_id": "dist_134930",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790779134.93018
+    },
+    {
+      "candidate_id": "dist_434281",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790779434.2816339
+    },
+    {
+      "candidate_id": "dist_211229",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790780211.2298346
+    },
+    {
+      "candidate_id": "dist_318070",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790780318.0701342
+    },
+    {
+      "candidate_id": "dist_551293",
+      "concept_or_rule": "PyTorch GPU memory pinned memory allocation pattern",
+      "domain": "machine_learning",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790782551.29334
+    },
+    {
+      "candidate_id": "dist_634365",
+      "concept_or_rule": "PyTorch GPU memory pinned memory allocation pattern",
+      "domain": "machine_learning",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790782634.3659024
+    },
+    {
+      "candidate_id": "dist_699149",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790782699.149888
+    },
+    {
+      "candidate_id": "dist_121553",
+      "concept_or_rule": "PyTorch GPU memory pinned memory allocation pattern",
+      "domain": "machine_learning",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790784121.5531058
+    },
+    {
+      "candidate_id": "dist_166878",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790786166.87846
+    },
+    {
+      "candidate_id": "dist_271819",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790786271.8192804
+    },
+    {
+      "candidate_id": "dist_387744",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790788387.7442498
+    },
+    {
+      "candidate_id": "dist_913082",
+      "concept_or_rule": "Frequent immutable math theorem",
+      "domain": "math",
+      "access_count": 15,
+      "confidence": 0.98,
+      "verified_stable": true,
+      "status": "QUEUED",
+      "created_at": 1790788913.0827985
+    }
+  ],
+  "updated_at": 1790788913.0838556
+}

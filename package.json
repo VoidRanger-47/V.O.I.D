@@ -1,0 +1,14 @@
+{
+  "name": "void-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "V.O.I.D. — Virtual Operator of Information & Development Web Interface",
+  "scripts": {
+    "dev": "serve .",
+    "start": "serve .",
+    "build": "node -e \"console.log('V.O.I.D. Web Assets Ready')\""
+  },
+  "devDependencies": {
+    "vercel": "^62.2.0"
+  }
+}

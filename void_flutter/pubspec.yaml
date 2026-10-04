@@ -1,0 +1,36 @@
+name: void_flutter
+description: "V.O.I.D. — Futuristic AI Companion & Neural Perception Client"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management & Architecture
+  provider: ^6.1.2
+
+  # Networking & Streaming
+  http: ^1.2.1
+
+  # Local Persistence
+  shared_preferences: ^2.2.3
+
+  # UI & Styling
+  google_fonts: ^6.2.1
+  flutter_spinkit: ^5.2.1
+  font_awesome_flutter: ^10.7.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

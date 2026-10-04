@@ -1,0 +1,13 @@
+{
+    "wake_word": "hey_void",
+    "wake_threshold": 800.0,
+    "mic_index": null,
+    "sample_rate": 16000,
+    "chunk_size": 1280,
+    "whisper_model": "small.en",
+    "voice": "en_US-amy-medium",
+    "voice_speed": 1.0,
+    "use_gpu": true,
+    "tts_enabled": true,
+    "dsp_effect": true
+}

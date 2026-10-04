@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1b1b18">
+    <title>V.O.I.D. | Virtual Operator of Information & Development</title>
+    <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+    <link rel="alternate icon" type="image/png" href="/static/favicon.png">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/chat.css?v=6.3">
+</head>
+<body class="theme-dark" data-theme="dark">
+
+    <div id="drag-overlay" class="hidden">
+        <div class="drop-zone">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <h3>Drop files here to analyze</h3>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+
+    <div class="app-container">
+        
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-area">
+                    <img src="/static/void-symbol.svg" alt="V.O.I.D. Logo" class="void-brand-symbol">
+                    <div class="brand-text-block">
+                        <span class="brand-title">V.O.I.D.</span>
+                        <span class="brand-subtitle">Cognitive OS</span>
+                    </div>
+                </div>
+                <button id="toggle-sidebar-btn" class="icon-btn mobile-only" aria-label="Close Sidebar"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <button class="new-chat-btn" onclick="ChatApp.newSession()">
+                <i class="fa-solid fa-plus"></i>
+                <span>New Chat</span>
+            </button>
+
+            <!-- Navigation items — Claude/Gemini style -->
+            <div class="sidebar-nav-section">
+                <div class="sidebar-nav-label">Features</div>
+
+                <a href="/vision" class="sidebar-nav-item" style="text-decoration:none;color:inherit;">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Vision HUD</span>
+                    <span class="sidebar-nav-badge">Live</span>
+                </a>
+
+                <button class="sidebar-nav-item" onclick="ChatApp.openImageStudio()">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Image Studio</span>
+                </button>
+
+                <button class="sidebar-nav-item" onclick="ChatApp.openIntelligenceHub()">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>AGI Intelligence</span>
+                </button>
+
+                <button class="sidebar-nav-item" onclick="ChatApp.openLearningDashboard()">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Learning Core</span>
+                </button>
+
+                <button class="sidebar-nav-item" onclick="ChatApp.openDesktopMcpModal()">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Desktop Control</span>
+                </button>
+
+                <button class="sidebar-nav-item" onclick="ChatApp.openRemoteDashboard()">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <span>Remote Dashboard</span>
+                </button>
+
+                <button class="sidebar-nav-item" onclick="ChatApp.openMemoryInspector()">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Memory Engine</span>
+                </button>
+            </div>
+
+            <div class="history-label">Recent</div>
+            <div class="chat-history-list" id="history-list"></div>
+
+            <div class="sidebar-footer">
+                <button class="sidebar-nav-item" onclick="ChatApp.toggleTheme()">
+                    <i id="theme-icon" class="fa-solid fa-sun"></i>
+                    <span>Toggle Theme</span>
+                </button>
+                <button class="sidebar-nav-item" onclick="ChatApp.exportChat()">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Export Data</span>
+                </button>
+                <button class="sidebar-nav-item" onclick="ChatApp.clearAllData()" style="color: rgba(239,68,68,0.8);">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Wipe Memory</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <button id="mobile-menu-btn" class="icon-btn mobile-only"><i class="fa-solid fa-bars"></i></button>
+                <div class="model-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">V.O.I.D. Neural Model Active</span>
+                    <span id="network-badge" class="network-badge offline" title="Offline-First Engine"><i class="fa-solid fa-shield-halved"></i> <span>100% Local Engine</span></span>
+                </div>
+                <div class="top-actions">
+                    <a href="/vision" class="icon-btn" title="Open Dedicated Vision HUD Webpage" style="text-decoration: none;"><i class="fa-solid fa-eye"></i></a>
+                    <button class="icon-btn" id="image-studio-btn" title="Offline Image Studio & Gallery" data-modal-target="#image-studio-modal" onclick="ChatApp.openImageStudio()"><i class="fa-solid fa-palette"></i></button>
+                    <button class="icon-btn" id="desktop-mcp-btn" title="Desktop GUI & MCP Control Layer" data-modal-target="#desktop-mcp-modal" onclick="ChatApp.openDesktopMcpModal()"><i class="fa-solid fa-desktop"></i></button>
+                    <button class="icon-btn" id="learning-dashboard-btn" title="V.O.I.D. Knowledge Core & Learning Dashboard" data-modal-target="#learning-modal" onclick="ChatApp.openLearningDashboard()"><i class="fa-solid fa-graduation-cap"></i></button>
+                    <button class="icon-btn" id="intelligence-hub-btn" title="V.O.I.D. Intelligence Hub: Agent Pipeline, Task Queue, Reflection & Codebase" data-modal-target="#intelligence-modal" onclick="ChatApp.openIntelligenceHub()"><i class="fa-solid fa-brain"></i></button>
+                    <button class="icon-btn" id="remote-dashboard-btn" title="Remote V.O.I.D. Dashboard & System Monitor" data-modal-target="#remote-dashboard-modal" onclick="ChatApp.openRemoteDashboard()"><i class="fa-solid fa-satellite-dish"></i></button>
+                    <button class="icon-btn" id="memory-inspector-btn" title="Memory Engine Inspector" data-modal-target="#memory-modal" onclick="ChatApp.openMemoryInspector()"><i class="fa-solid fa-database"></i></button>
+                    <button class="icon-btn" id="auto-speak-btn" title="Toggle Auto-Speak Voice Output"><i class="fa-solid fa-volume-xmark"></i></button>
+                    <button class="icon-btn" title="Settings" data-modal-target="#settings-modal"><i class="fa-solid fa-gear"></i></button>
+                    <div class="user-avatar" id="user-avatar">U</div>
+                </div>
+            </header>
+
+            <div id="chat-viewport" class="chat-viewport">
+                <div class="welcome-screen" id="welcome-screen">
+                    <div class="welcome-brand-hero">
+                        <div class="welcome-logo-halo">
+                            <img src="/static/void-symbol.svg" alt="V.O.I.D." class="welcome-symbol-img">
+                        </div>
+                    </div>
+                    <h1 id="welcome-greeting">Good to see you, <span class="void-accent">User</span>.</h1>
+                    <p>Your local, private, offline AI system &amp; Neural Cognitive Engine.</p>
+
+                    <div id="name-prompt" class="name-prompt-group">
+                        <input type="text" id="user-name-input" placeholder="What's your name?">
+                        <button class="primary-btn" onclick="ChatApp.setUserName()"><i class="fa-solid fa-check"></i> Set Name</button>
+                    </div>
+
+                    <div class="suggestions">
+                        <div class="chip" onclick="ChatApp.quickPrompt('V.O.I.D., activate vision.')">👁️ Activate Vision</div>
+                        <div class="chip" onclick="ChatApp.quickPrompt('What do you see?')">🔍 What do you see?</div>
+                        <div class="chip" onclick="ChatApp.quickPrompt('Open VS Code and work on my project')">💻 Open VS Code</div>
+                        <div class="chip" onclick="ChatApp.quickPrompt('Show local system stats')">📊 System Stats</div>
+                        <div class="chip" onclick="ChatApp.quickPrompt('Solve 3x^2 + 5x - 12 = 0')">🧮 Math Solver</div>
+                    </div>
+                </div>
+                
+                <div id="message-container" class="message-container">
+                    </div>
+
+                <div id="thinking-indicator" class="message-row void hidden">
+                    <div class="avatar-void"><img src="/static/void-symbol.svg" alt="V.O.I.D." class="void-avatar-icon"></div>
+                    <div class="thinking-bubble">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <!-- Floating V.O.I.D. Neural Attachment & Action Menu -->
+                <div id="attachment-action-menu" class="void-attachment-menu hidden" role="dialog" aria-label="Neural Actions Menu">
+                    <div class="void-menu-header">
+                        <div class="void-menu-header-left">
+                            <span class="void-menu-status-dot"></span>
+                            <span class="void-menu-title">V.O.I.D. NEURAL ACTIONS</span>
+                        </div>
+                        <button type="button" class="void-menu-close-btn" id="void-menu-close-btn" aria-label="Close menu" title="Close actions menu">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="void-menu-divider"></div>
+                    <div class="void-menu-items">
+                        <button type="button" class="void-action-tile" id="menu-action-vision" data-action="vision">
+                            <div class="void-tile-icon-box">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                            <div class="void-tile-content">
+                                <div class="void-tile-title">Vision Input / Attach Photo</div>
+                                <div class="void-tile-desc">Upload image for neural analysis</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right void-tile-arrow"></i>
+                        </button>
+
+                        <button type="button" class="void-action-tile" id="menu-action-files" data-action="files">
+                            <div class="void-tile-icon-box">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </div>
+                            <div class="void-tile-content">
+                                <div class="void-tile-title">Files &amp; Docs</div>
+                                <div class="void-tile-desc">Browse local system files</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right void-tile-arrow"></i>
+                        </button>
+
+                        <button type="button" class="void-action-tile" id="menu-action-generate" data-action="generate">
+                            <div class="void-tile-icon-box">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </div>
+                            <div class="void-tile-content">
+                                <div class="void-tile-title">Generate Image</div>
+                                <div class="void-tile-desc">SD-Turbo offline canvas</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right void-tile-arrow"></i>
+                        </button>
+
+                        <button type="button" class="void-action-tile" id="menu-action-memory" data-action="memory">
+                            <div class="void-tile-icon-box">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <div class="void-tile-content">
+                                <div class="void-tile-title">Neural Memory</div>
+                                <div class="void-tile-desc">Inspect local context memory</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right void-tile-arrow"></i>
+                        </button>
+
+                        <button type="button" class="void-action-tile" id="menu-action-search" data-action="search">
+                            <div class="void-tile-icon-box">
+                                <i class="fa-solid fa-globe"></i>
+                            </div>
+                            <div class="void-tile-content">
+                                <div class="void-tile-title">Web Search / Network</div>
+                                <div class="void-tile-desc">Query external web data</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right void-tile-arrow"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="file-preview-area" id="file-preview-area"></div>
+
+                <div class="input-bar">
+                    <div class="attach-btn-wrapper">
+                        <input type="file" id="file-upload" multiple hidden>
+                        <input type="file" id="vision-upload" accept="image/*" multiple hidden>
+                        <button type="button" id="attachment-plus-btn" class="attachment-plus-btn" aria-label="Add attachments and actions" title="Add attachments &amp; actions" aria-expanded="false">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <button id="voice-btn" class="icon-btn voice-btn" title="Voice input (click to record)">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+
+                    <button id="thinking-toggle-btn" class="input-toggle-btn" title="Toggle Deep Thinking Mode">
+                        <i class="fa-solid fa-brain"></i>
+                        <span>Think</span>
+                    </button>
+
+                    <button id="search-toggle-btn" class="input-toggle-btn" title="Toggle Live Web Search">
+                        <i class="fa-solid fa-globe"></i>
+                        <span>Search</span>
+                    </button>
+
+                    <textarea id="user-input" rows="1" placeholder="Ask V.O.I.D. anything..." autofocus></textarea>
+
+                    <button id="send-btn" class="send-btn">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                </div>
+                <div class="voice-status" id="voice-status" style="display: none;">
+                    <span id="voice-status-text">🎤 Recording...</span>
+                </div>
+                <div class="disclaimer">
+                    V.O.I.D. runs 100% locally &bull; Voice &bull; Vision &bull; AGI Cognitive Engine Active
+                </div>
+            </div>
+        </main>
+
+        <!-- CLAUDE ARTIFACTS SPLIT CANVAS -->
+        <aside class="artifacts-panel hidden" id="artifacts-panel">
+            <div class="artifacts-header">
+                <div class="artifacts-title">
+                    <i class="fa-solid fa-shapes"></i>
+                    <span id="artifact-title-text">Interactive Artifact</span>
+                </div>
+                <div class="artifacts-tabs">
+                    <button class="artifact-tab-btn active" id="artifact-tab-preview" onclick="ChatApp.switchArtifactTab('preview')">
+                        <i class="fa-solid fa-eye"></i> Live Preview
+                    </button>
+                    <button class="artifact-tab-btn" id="artifact-tab-code" onclick="ChatApp.switchArtifactTab('code')">
+                        <i class="fa-solid fa-code"></i> Code
+                    </button>
+                </div>
+                <div class="artifacts-actions">
+                    <button class="icon-btn" onclick="ChatApp.copyArtifactContent()" title="Copy Artifact Code">
+                        <i class="fa-solid fa-copy"></i>
+                    </button>
+                    <button class="icon-btn" onclick="ChatApp.downloadArtifactFile()" title="Download File">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <button class="icon-btn" onclick="ChatApp.closeArtifactPanel()" title="Close Canvas">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="artifacts-body">
+                <div class="artifact-preview-wrapper" id="artifact-preview-wrapper">
+                    <iframe id="artifact-iframe" sandbox="allow-scripts allow-modals allow-same-origin"></iframe>
+                </div>
+                <div class="artifact-code-wrapper hidden" id="artifact-code-wrapper">
+                    <pre><code id="artifact-code-element"></code></pre>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h2><i class="fa-solid fa-sliders"></i> Engine Settings</h2>
+                    <span class="modal-subtitle">Configure voice synthesis, thinking depth, and neural creativity</span>
+                </div>
+                <button class="modal-close-icon-btn" id="modal-close-icon-btn" title="Close Settings (Esc)">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Section 1: Voice & Speech Synthesis -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <i class="fa-solid fa-volume-high"></i>
+                        <span>Voice & Audio Synthesis</span>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="voice-engine-select"><i class="fa-solid fa-microchip"></i> Synthesis Engine</label>
+                        <select id="voice-engine-select" class="setting-select">
+                            <option value="browser">Browser Web Speech API (Zero Latency)</option>
+                            <option value="server">Local Offline Server Audio (WAV Stream)</option>
+                        </select>
+                        <p class="help-text">Choose between client browser speech synthesis or local server offline audio.</p>
+                    </div>
+
+                    <div class="setting-group" id="voice-select-group">
+                        <label for="voice-select"><i class="fa-solid fa-user-tie"></i> Voice Accent & Persona</label>
+                        <select id="voice-select" class="setting-select">
+                            <option value="default">Default System Voice</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <div class="setting-label-row">
+                            <label for="voice-rate"><i class="fa-solid fa-gauge-high"></i> Speech Speed</label>
+                            <span id="voice-rate-val" class="range-value-pill">1.0x</span>
+                        </div>
+                        <input type="range" id="voice-rate" min="0.5" max="2.0" step="0.1" value="1.0" class="custom-slider">
+                    </div>
+
+                    <div class="setting-group toggle-card">
+                        <div class="toggle-card-info">
+                            <span class="toggle-card-title"><i class="fa-solid fa-bullhorn"></i> Auto-Speak Responses</span>
+                            <span class="toggle-card-desc">Automatically speak assistant replies out loud when generation completes.</span>
+                        </div>
+                        <label class="custom-switch">
+                            <input type="checkbox" id="auto-speak-checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-group action-group">
+                        <button class="secondary-btn" id="test-voice-btn" type="button">
+                            <i class="fa-solid fa-circle-play"></i> Test Voice Output
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section 2: Neural Creativity & Parameters -->
+                <div class="settings-section">
+                    <div class="section-header">
+                        <i class="fa-solid fa-brain"></i>
+                        <span>Neural Model & Generation</span>
+                    </div>
+
+                    <div class="setting-group">
+                        <div class="setting-label-row">
+                            <label for="temperature"><i class="fa-solid fa-fire"></i> Temperature (Creativity)</label>
+                            <span id="temp-value" class="range-value-pill">0.7</span>
+                        </div>
+                        <input type="range" id="temperature" min="0.1" max="1.0" step="0.1" value="0.7" class="custom-slider">
+                        <p class="help-text">Controls randomness. Lower values produce more precise, deterministic responses.</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <div class="setting-label-row">
+                            <label for="max-tokens"><i class="fa-solid fa-lines-leaning"></i> Max Response Length</label>
+                            <span id="tokens-value" class="range-value-pill">200 tokens</span>
+                        </div>
+                        <input type="range" id="max-tokens" min="50" max="512" step="10" value="200" class="custom-slider">
+                        <p class="help-text">The maximum number of tokens V.O.I.D. will generate in a single response.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="primary-btn save-settings-btn" id="modal-save-btn">
+                    <i class="fa-solid fa-check"></i> Save & Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REMOTE ACCESS & LIVE DASHBOARD MODAL -->
+    <div id="remote-dashboard-modal" class="modal-backdrop hidden">
+        <div class="modal-dialog modal-large">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-satellite-dish fa-beat-fade" style="--fa-animation-duration: 2s; color: var(--accent-color);"></i>
+                    <span>Remote V.O.I.D. Control Dashboard</span>
+                </div>
+                <button class="icon-btn modal-close-btn" data-modal-close="#remote-dashboard-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <div class="modal-body remote-dashboard-body">
+                <!-- Nav Tabs -->
+                <div class="remote-nav-tabs">
+                    <button class="remote-tab active" id="tab-btn-monitor" onclick="ChatApp.switchRemoteTab('monitor')">
+                        <i class="fa-solid fa-gauge-high"></i> Live Monitor
+                    </button>
+                    <button class="remote-tab" id="tab-btn-tunnel" onclick="ChatApp.switchRemoteTab('tunnel')">
+                        <i class="fa-solid fa-mobile-screen"></i> Phone & LAN Link
+                    </button>
+                    <button class="remote-tab" id="tab-btn-mobile-hud" onclick="ChatApp.switchRemoteTab('mobile-hud')">
+                        <i class="fa-solid fa-mobile-screen-button"></i> Mobile Companion & Alerts
+                    </button>
+                    <button class="remote-tab" id="tab-btn-terminal" onclick="ChatApp.switchRemoteTab('terminal')">
+                        <i class="fa-solid fa-terminal"></i> Remote Terminal
+                    </button>
+                    <button class="remote-tab" id="tab-btn-security" onclick="ChatApp.switchRemoteTab('security')">
+                        <i class="fa-solid fa-shield-halved"></i> Safety & Controls
+                    </button>
+                </div>
+
+                <!-- Tab 1: Live System Monitor -->
+                <div class="remote-tab-content" id="panel-monitor">
+                    <div class="monitor-top-bar">
+                        <div class="live-indicator">
+                            <span class="pulse-dot"></span>
+                            <span id="monitor-status-text">Live Telemetry Active</span>
+                        </div>
+                        <div class="monitor-actions">
+                            <button class="secondary-btn btn-sm" onclick="ChatApp.fetchLiveSystemStats()" title="Refresh Telemetry">
+                                <i class="fa-solid fa-rotate"></i> Refresh
+                            </button>
+                            <label class="auto-refresh-label">
+                                <input type="checkbox" id="monitor-auto-refresh" checked onchange="ChatApp.toggleMonitorAutoRefresh()">
+                                <span>Auto-update (2s)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <!-- CPU -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-microchip"></i> CPU Usage</span>
+                                <span class="stat-badge" id="cpu-cores-badge">-- Cores</span>
+                            </div>
+                            <div class="stat-card-value" id="cpu-usage-val">0%</div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" id="cpu-bar" style="width: 0%;"></div></div>
+                            <div class="stat-card-sub" id="cpu-freq-val">Clock: -- MHz</div>
+                        </div>
+
+                        <!-- GPU / CUDA -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-vr-cardboard"></i> GPU / CUDA</span>
+                                <span class="stat-badge" id="gpu-avail-badge">Checking</span>
+                            </div>
+                            <div class="stat-card-value" id="gpu-name-val">Loading...</div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill gpu-fill" id="vram-bar" style="width: 0%;"></div></div>
+                            <div class="stat-card-sub" id="vram-usage-val">VRAM: 0.0 / 0.0 GB (0%)</div>
+                        </div>
+
+                        <!-- RAM -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-memory"></i> RAM Memory</span>
+                                <span class="stat-badge" id="ram-pct-badge">0%</span>
+                            </div>
+                            <div class="stat-card-value" id="ram-used-val">0.0 GB</div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" id="ram-bar" style="width: 0%;"></div></div>
+                            <div class="stat-card-sub" id="ram-total-val">Total: 0.0 GB</div>
+                        </div>
+
+                        <!-- Disk Storage -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-hard-drive"></i> Storage Drive</span>
+                                <span class="stat-badge" id="disk-pct-badge">0%</span>
+                            </div>
+                            <div class="stat-card-value" id="disk-free-val">0.0 GB Free</div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill disk-fill" id="disk-bar" style="width: 0%;"></div></div>
+                            <div class="stat-card-sub" id="disk-total-val">Used: 0.0 GB / 0.0 GB</div>
+                        </div>
+
+                        <!-- Thermal & Power -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-temperature-half"></i> Temperature & Power</span>
+                            </div>
+                            <div class="stat-card-value" id="temp-val">Normal</div>
+                            <div class="stat-card-sub" id="power-status-val">Battery: --% • Plugged in</div>
+                        </div>
+
+                        <!-- Host & Uptime -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-server"></i> Host Uptime</span>
+                            </div>
+                            <div class="stat-card-value" id="uptime-val">--</div>
+                            <div class="stat-card-sub" id="host-os-val">OS: Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Phone & Local Network Connection -->
+                <div class="remote-tab-content hidden" id="panel-tunnel">
+                    <div class="tunnel-container">
+                        <div class="tunnel-card primary-tunnel-card">
+                            <div class="tunnel-header">
+                                <h3><i class="fa-solid fa-mobile-screen"></i> Phone Remote Connection</h3>
+                                <span class="status-pill" id="tunnel-status-pill"><i class="fa-solid fa-signal"></i> Active</span>
+                            </div>
+                            <p class="tunnel-desc">Scan the QR code with your phone or open the remote address in your mobile browser to control V.O.I.D. anywhere on your network.</p>
+
+                            <div class="tunnel-url-group">
+                                <label>Direct Web Access URL:</label>
+                                <div class="copy-input-row">
+                                    <input type="text" id="tunnel-primary-url" readonly value="http://localhost:5000">
+                                    <button class="primary-btn btn-sm" onclick="ChatApp.copyTunnelUrl()"><i class="fa-solid fa-copy"></i> Copy Link</button>
+                                </div>
+                            </div>
+
+                            <div class="qr-preview-area">
+                                <div id="qr-code-box" class="qr-code-box"></div>
+                                <div class="qr-instruction">
+                                    <strong>📱 Instant Android Camera Scan</strong>
+                                    <p>Point your phone's camera at the QR code to open the V.O.I.D. touch-friendly interface directly on your mobile device.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Mobile Companion & Alerts HUD -->
+                <div class="remote-tab-content hidden" id="panel-mobile-hud">
+                    <!-- Top Phone Connection & Battery Bar -->
+                    <div class="monitor-top-bar" style="margin-bottom: 16px;">
+                        <div class="live-indicator">
+                            <span class="pulse-dot" id="phone-pulse-dot"></span>
+                            <span id="phone-status-text">Android Phone Offline / Scanning</span>
+                        </div>
+                        <div class="monitor-actions">
+                            <button class="secondary-btn btn-sm" onclick="ChatApp.loadMobileHUD()" title="Refresh Telemetry">
+                                <i class="fa-solid fa-rotate"></i> Refresh Telemetry
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Phone Stats Grid -->
+                    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
+                        <!-- Device Model -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-mobile-screen"></i> Device</span>
+                                <span class="stat-badge" id="phone-conn-badge">--</span>
+                            </div>
+                            <div class="stat-card-value" id="phone-model-val" style="font-size: 1.1rem;">No Device Connected</div>
+                            <div class="stat-card-sub" id="phone-os-val">Android: -- • SDK: --</div>
+                        </div>
+
+                        <!-- Battery -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-battery-half"></i> Phone Battery</span>
+                                <span class="stat-badge" id="phone-batt-pct-badge">--%</span>
+                            </div>
+                            <div class="stat-card-value" id="phone-batt-val">--%</div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" id="phone-batt-bar" style="width: 0%;"></div></div>
+                            <div class="stat-card-sub" id="phone-batt-status-val">Status: -- • Temp: --°C</div>
+                        </div>
+
+                        <!-- Foreground App & Display -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-window-maximize"></i> Active App</span>
+                                <span class="stat-badge" id="phone-screen-state-badge">Screen: --</span>
+                            </div>
+                            <div class="stat-card-value" id="phone-app-val" style="font-size: 0.95rem; word-break: break-all;">--</div>
+                            <div class="stat-card-sub" id="phone-res-val">Resolution: --</div>
+                        </div>
+
+                        <!-- Network / Wi-Fi -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <span><i class="fa-solid fa-wifi"></i> Network</span>
+                            </div>
+                            <div class="stat-card-value" id="phone-ip-val" style="font-size: 1.05rem;">--</div>
+                            <div class="stat-card-sub" id="phone-ssid-val">WiFi: Disconnected</div>
+                        </div>
+                    </div>
+
+                    <!-- Split Actions: Left (Screen Mirror Preview), Right (Notification Dispatcher & SMS) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <!-- Screen Capture Perception Card -->
+                        <div class="security-card" style="display: flex; flex-direction: column;">
+                            <div class="sec-card-header">
+                                <i class="fa-solid fa-camera" style="color: #38bdf8;"></i>
+                                <div>
+                                    <h4>Remote Screen Perception</h4>
+                                    <p>Live Android frame capture for visual AI comprehension & remote monitoring.</p>
+                                </div>
+                            </div>
+                            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; min-height: 260px; margin-bottom: 12px;">
+                                <img id="phone-screen-img" src="" alt="Phone screen frame" style="max-height: 240px; max-width: 100%; border-radius: 6px; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.5);" />
+                                <div id="phone-screen-placeholder" style="color: var(--text-muted, #94a3b8); text-align: center; font-size: 0.9rem;">
+                                    <i class="fa-solid fa-mobile" style="font-size: 2rem; margin-bottom: 8px; opacity: 0.5;"></i><br>
+                                    Click "Capture Screen Frame" to perceive the connected smartphone.
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="primary-btn btn-sm" onclick="ChatApp.capturePhoneScreen()" style="flex: 1;">
+                                    <i class="fa-solid fa-camera"></i> Capture Screen Frame
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mission Notifications & Communications Dispatcher -->
+                        <div class="security-card">
+                            <div class="sec-card-header">
+                                <i class="fa-solid fa-bell" style="color: #f59e0b;"></i>
+                                <div>
+                                    <h4>Mission Notifications & Alerts</h4>
+                                    <p>Relay mission milestones, alerts, and read incoming SMS/notifications.</p>
+                                </div>
+                            </div>
+
+                            <!-- Push Notification Input Form -->
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+                                <input type="text" id="phone-notif-title" placeholder="Alert Title (e.g., V.O.I.D. Mission Complete)..." style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 0.88rem;">
+                                <input type="text" id="phone-notif-msg" placeholder="Notification body / mission milestone message..." style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 0.88rem;">
+                                <div style="display: flex; gap: 8px;">
+                                    <button class="primary-btn btn-sm" onclick="ChatApp.sendPhoneNotification()" style="flex: 1;">
+                                        <i class="fa-solid fa-paper-plane"></i> Push Notification
+                                    </button>
+                                    <button class="secondary-btn btn-sm" onclick="ChatApp.sendPhoneToast()">
+                                        <i class="fa-solid fa-comment-dots"></i> Send Toast
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Inbound Communications Section -->
+                            <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <strong style="font-size: 0.88rem; color: #e2e8f0;"><i class="fa-solid fa-envelope-open-text"></i> Communications Hub</strong>
+                                    <div style="display: flex; gap: 6px;">
+                                        <button class="secondary-btn btn-sm" onclick="ChatApp.loadPhoneSMS()" style="padding: 3px 8px; font-size: 0.75rem;">
+                                            <i class="fa-solid fa-comment"></i> SMS
+                                        </button>
+                                        <button class="secondary-btn btn-sm" onclick="ChatApp.loadPhoneBriefing()" style="padding: 3px 8px; font-size: 0.75rem; border-color: #38bdf8; color: #38bdf8;">
+                                            <i class="fa-solid fa-sparkles"></i> AI Briefing
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="phone-comms-output" style="max-height: 120px; overflow-y: auto; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 8px; font-size: 0.8rem; color: #cbd5e1; font-family: monospace; white-space: pre-wrap;">No communications queried yet. Click SMS or AI Briefing above.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Remote Command Terminal -->
+                <div class="remote-tab-content hidden" id="panel-terminal">
+                    <!-- Confirmation Dialog Overlay for Sensitive Commands -->
+                    <div id="cmd-confirm-banner" class="cmd-confirm-banner hidden">
+                        <div class="confirm-alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="confirm-alert-content">
+                            <h4>⚠️ Sensitive Command Confirmation Required</h4>
+                            <p id="confirm-reason-text">This command can alter or terminate system processes.</p>
+                            <div class="confirm-code-preview"><code id="confirm-cmd-text">...</code></div>
+                            <div class="confirm-actions">
+                                <button class="danger-btn btn-sm" id="confirm-approve-btn" onclick="ChatApp.approveRemoteCommand()"><i class="fa-solid fa-check"></i> Approve & Execute</button>
+                                <button class="secondary-btn btn-sm" onclick="ChatApp.denyRemoteCommand()"><i class="fa-solid fa-times"></i> Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="terminal-quick-chips">
+                        <span class="chip-label">Quick Commands:</span>
+                        <div class="chip btn-sm" onclick="ChatApp.runTerminalPreset('nvidia-smi')">📊 nvidia-smi</div>
+                        <div class="chip btn-sm" onclick="ChatApp.runTerminalPreset('ipconfig')">🌐 ipconfig</div>
+                        <div class="chip btn-sm" onclick="ChatApp.runTerminalPreset('dir')">📂 dir</div>
+                        <div class="chip btn-sm" onclick="ChatApp.runTerminalPreset('systeminfo')">⚡ systeminfo</div>
+                        <div class="chip btn-sm" onclick="ChatApp.runTerminalPreset('tasklist')">🔍 tasklist</div>
+                    </div>
+
+                    <div class="terminal-output-box" id="terminal-output">
+                        <div class="term-line prompt-line"><span class="term-prompt">V.O.I.D. Remote Shell [Version 4.0]</span></div>
+                        <div class="term-line prompt-line"><span class="term-comment">Type any system command below to execute remotely on Host PC.</span></div>
+                    </div>
+
+                    <div class="terminal-input-bar">
+                        <span class="term-prompt-symbol">&gt;</span>
+                        <input type="text" id="terminal-cmd-input" placeholder="Enter system command (e.g. dir, ping, git status, nvidia-smi)..." onkeydown="if(event.key==='Enter') ChatApp.executeRemoteCommand()">
+                        <button class="primary-btn btn-sm" onclick="ChatApp.executeRemoteCommand()"><i class="fa-solid fa-play"></i> Run</button>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Safety & Controls -->
+                <div class="remote-tab-content hidden" id="panel-security">
+                    <div class="security-controls-grid">
+                        <div class="security-card danger-card">
+                            <div class="sec-card-header">
+                                <i class="fa-solid fa-shield-virus"></i>
+                                <div>
+                                    <h4>Emergency Lockdown</h4>
+                                    <p>Immediately halts all autonomous tools and prevents external file/app execution.</p>
+                                </div>
+                            </div>
+                            <div class="sec-card-action">
+                                <button class="danger-btn" id="remote-emergency-btn" onclick="ChatApp.toggleEmergencyStop()">
+                                    <i class="fa-solid fa-hand"></i> Trigger Emergency Stop
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="security-card">
+                            <div class="sec-card-header">
+                                <i class="fa-solid fa-user-shield"></i>
+                                <div>
+                                    <h4>Remote Permission Level</h4>
+                                    <p>Restrict or grant tool execution scope from remote devices.</p>
+                                </div>
+                            </div>
+                            <div class="sec-card-action">
+                                <select id="remote-permission-select" class="setting-select" onchange="ChatApp.updatePermissionLevel(this.value)">
+                                    <option value="6">Level 6: Full Network & System Tools</option>
+                                    <option value="4">Level 4: App & Document Control</option>
+                                    <option value="2">Level 2: Read-Only Files</option>
+                                    <option value="0">Level 0: Chat Only (Zero Execution)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- System Power Actions -->
+                        <div class="security-card">
+                            <div class="sec-card-header">
+                                <i class="fa-solid fa-power-off" style="color: #ef4444;"></i>
+                                <div>
+                                    <h4>Host Power Management</h4>
+                                    <p>Remotely shut down or reboot your host computer with a 15-second grace period.</p>
+                                </div>
+                            </div>
+                            <div class="sec-card-action" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="danger-btn" onclick="ChatApp.triggerSystemPower('shutdown')" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                    <i class="fa-solid fa-power-off"></i> Shut Down Laptop
+                                </button>
+                                <button class="secondary-btn" onclick="ChatApp.triggerSystemPower('restart')" style="border-color: #f59e0b; color: #f59e0b; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                    <i class="fa-solid fa-rotate-right"></i> Restart Laptop
+                                </button>
+                                <button class="secondary-btn" onclick="ChatApp.triggerSystemPower('abort')" style="border-color: #10b981; color: #10b981; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                                    <i class="fa-solid fa-ban"></i> Cancel Shutdown
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="secondary-btn" data-modal-close="#remote-dashboard-modal">Close Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- INTELLIGENCE HUB & TASK QUEUE MODAL -->
+    <div id="intelligence-modal" class="modal-backdrop hidden">
+        <div class="modal-dialog modal-large">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-brain" style="color: #38bdf8;"></i>
+                    <span>V.O.I.D. Intelligence & Multi-Agent Hub</span>
+                </div>
+                <button class="icon-btn modal-close-btn" data-modal-close="#intelligence-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <div class="modal-body intelligence-body">
+                <!-- Nav Tabs -->
+                <div class="intel-nav-tabs">
+                    <button class="intel-tab active" id="tab-btn-tasks" onclick="ChatApp.switchIntelTab('tasks')">
+                        <i class="fa-solid fa-list-check"></i> Task Queue
+                    </button>
+                    <button class="intel-tab" id="tab-btn-pipeline" onclick="ChatApp.switchIntelTab('pipeline')">
+                        <i class="fa-solid fa-network-wired"></i> Agent Pipeline
+                    </button>
+                    <button class="intel-tab" id="tab-btn-reflections" onclick="ChatApp.switchIntelTab('reflections')">
+                        <i class="fa-solid fa-book-journal-whills"></i> Self-Reflection
+                    </button>
+                    <button class="intel-tab" id="tab-btn-codebase" onclick="ChatApp.switchIntelTab('codebase')">
+                        <i class="fa-solid fa-folder-tree"></i> Project Codebase
+                    </button>
+                    <button class="intel-tab" id="tab-btn-router" onclick="ChatApp.switchIntelTab('router')">
+                        <i class="fa-solid fa-route"></i> Skill Router
+                    </button>
+                </div>
+
+                <!-- Tab 1: Task Queue & Missions -->
+                <div class="intel-tab-content" id="panel-tasks">
+                    <div class="tasks-control-bar">
+                        <div class="task-create-row">
+                            <input type="text" id="new-task-title" placeholder="Task Title (e.g. Refactor API, Train Model)...">
+                            <input type="text" id="new-task-goal" placeholder="Goal & Description...">
+                            <button class="primary-btn btn-sm" onclick="ChatApp.enqueueTask()"><i class="fa-solid fa-plus"></i> Enqueue Task</button>
+                        </div>
+                        <div class="tasks-action-row">
+                            <button class="secondary-btn btn-sm" onclick="ChatApp.loadTasks()"><i class="fa-solid fa-rotate"></i> Refresh Tasks</button>
+                            <button class="primary-btn btn-sm" onclick="ChatApp.runNextTask()"><i class="fa-solid fa-play"></i> Run Next Task</button>
+                        </div>
+                    </div>
+
+                    <div class="tasks-container" id="tasks-list">
+                        <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading tasks...</div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Multi-Agent Pipeline (Planner -> Researcher -> Coder -> Executor -> Verifier) -->
+                <div class="intel-tab-content hidden" id="panel-pipeline">
+                    <div class="pipeline-runner-box">
+                        <label>Multi-Agent Execution Objective (Planner ➔ Researcher ➔ Coder ➔ Executor ➔ Verifier):</label>
+                        <div class="pipeline-input-row">
+                            <input type="text" id="pipeline-goal-input" placeholder="e.g. Write a Python AST analyzer and verify its execution..." onkeydown="if(event.key==='Enter') ChatApp.runAgentPipeline()">
+                            <button class="primary-btn" id="pipeline-run-btn" onclick="ChatApp.runAgentPipeline()"><i class="fa-solid fa-play"></i> Run Pipeline</button>
+                        </div>
+                    </div>
+
+                    <!-- Visual Flowchart of Stages -->
+                    <div class="agent-flowchart">
+                        <div class="agent-node" id="node-planner">
+                            <div class="node-icon"><i class="fa-solid fa-lightbulb"></i></div>
+                            <div class="node-label">Planner</div>
+                        </div>
+                        <div class="node-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="agent-node" id="node-researcher">
+                            <div class="node-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                            <div class="node-label">Researcher</div>
+                        </div>
+                        <div class="node-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="agent-node" id="node-coder">
+                            <div class="node-icon"><i class="fa-solid fa-code"></i></div>
+                            <div class="node-label">Coder</div>
+                        </div>
+                        <div class="node-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="agent-node" id="node-executor">
+                            <div class="node-icon"><i class="fa-solid fa-terminal"></i></div>
+                            <div class="node-label">Executor</div>
+                        </div>
+                        <div class="node-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="agent-node" id="node-verifier">
+                            <div class="node-icon"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="node-label">Verifier</div>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-output-area" id="pipeline-output-box">
+                        <div class="pipeline-placeholder">Enter a goal above and click 'Run Pipeline' to watch the multi-agent system collaborate in real-time.</div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Self-Reflection Journal -->
+                <div class="intel-tab-content hidden" id="panel-reflections">
+                    <div class="reflections-header">
+                        <p>V.O.I.D. metacognitive evaluations: learns from past execution outcomes to improve future problem-solving.</p>
+                        <button class="secondary-btn btn-sm" onclick="ChatApp.loadReflections()"><i class="fa-solid fa-rotate"></i> Refresh Journal</button>
+                    </div>
+                    <div class="reflections-container" id="reflections-list">
+                        <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading reflections...</div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Project Codebase Awareness -->
+                <div class="intel-tab-content hidden" id="panel-codebase">
+                    <div class="codebase-stats-grid" id="codebase-stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-card-header"><i class="fa-solid fa-folder"></i> Workspace Files</span>
+                            <span class="stat-card-value" id="codebase-total-files">--</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-card-header"><i class="fa-solid fa-cubes"></i> Python Symbols</span>
+                            <span class="stat-card-value" id="codebase-total-symbols">--</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-card-header"><i class="fa-solid fa-database"></i> Total Size</span>
+                            <span class="stat-card-value" id="codebase-total-size">-- MB</span>
+                        </div>
+                    </div>
+
+                    <div class="codebase-sections">
+                        <h4><i class="fa-solid fa-sitemap"></i> Core Architectural Modules</h4>
+                        <div class="modules-grid" id="codebase-modules-list"></div>
+
+                        <h4><i class="fa-solid fa-folder-tree"></i> Interactive Codebase File Tree</h4>
+                        <div class="file-tree-box" id="file-tree-viewer"></div>
+                    </div>
+                </div>
+
+                <!-- Tab 5: Skill Router Inspector -->
+                <div class="intel-tab-content hidden" id="panel-router">
+                    <div class="router-test-box">
+                        <label>Test Intent Routing on any Prompt:</label>
+                        <div class="router-input-row">
+                            <input type="text" id="router-test-input" placeholder="e.g. solve x^2 - 4 = 0, open notepad, run python: print(1), what is V.O.I.D. architecture?..." onkeydown="if(event.key==='Enter') ChatApp.inspectSkillRoute()">
+                            <button class="primary-btn btn-sm" onclick="ChatApp.inspectSkillRoute()"><i class="fa-solid fa-compass"></i> Route Intent</button>
+                        </div>
+                    </div>
+                    <div class="router-result-card hidden" id="router-result-card"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="secondary-btn" data-modal-close="#intelligence-modal">Close Hub</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎓 KNOWLEDGE CORE & CONTINUOUS LEARNING DASHBOARD MODAL -->
+    <div id="learning-modal" class="modal-backdrop hidden">
+        <div class="modal-dialog modal-large">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(255, 85, 0, 0.3);">
+                <div class="modal-title">
+                    <i class="fa-solid fa-graduation-cap" style="color: #ff5500;"></i>
+                    <span>V.O.I.D. Knowledge Core &amp; Continuous Learning</span>
+                </div>
+                <button class="icon-btn modal-close-btn" data-modal-close="#learning-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <div class="modal-body learning-modal-body">
+                <!-- Learning Core Metric Cards -->
+                <div class="learning-metrics-grid">
+                    <div class="stat-card" style="border-left: 3px solid #ff5500;">
+                        <div class="stat-card-header">
+                            <span><i class="fa-solid fa-book-bookmark"></i> Total Knowledge Records</span>
+                        </div>
+                        <div class="stat-card-value" id="stat-total-knowledge" style="color: #ff5500;">0</div>
+                        <div class="stat-card-sub" id="stat-unique-sources">From 0 unique web sources</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid #22c55e;">
+                        <div class="stat-card-header">
+                            <span><i class="fa-solid fa-shield-check"></i> Verified Records</span>
+                        </div>
+                        <div class="stat-card-value" id="stat-verified-knowledge" style="color: #22c55e;">0</div>
+                        <div class="stat-card-sub">Multi-source confirmed</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid #eab308;">
+                        <div class="stat-card-header">
+                            <span><i class="fa-solid fa-hourglass-half"></i> Pending / Quarantine</span>
+                        </div>
+                        <div class="stat-card-value" id="stat-pending-knowledge" style="color: #eab308;">0</div>
+                        <div class="stat-card-sub">Sandbox quarantine</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 3px solid #ef4444;">
+                        <div class="stat-card-header">
+                            <span><i class="fa-solid fa-triangle-exclamation"></i> Outdated / Disputed</span>
+                        </div>
+                        <div class="stat-card-value" id="stat-outdated-knowledge" style="color: #ef4444;">0</div>
+                        <div class="stat-card-sub" id="stat-conflicted-knowledge">0 conflicts detected</div>
+                    </div>
+                </div>
+
+                <!-- Learning Action & Control Bar -->
+                <div class="learning-control-panel" style="background: rgba(255, 85, 0, 0.05); border: 1px solid rgba(255, 85, 0, 0.2); border-radius: 12px; padding: 14px 18px; margin: 16px 0; display: flex; flex-direction: column; gap: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <span style="font-weight: 600; font-size: 0.95rem; color: #fff;">
+                            <i class="fa-solid fa-bolt" style="color: #ff5500;"></i> Interactive Learning &amp; Web Research
+                        </span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 0.82rem; color: var(--text-muted);">Autonomous Learning (Auto-Study):</span>
+                            <button id="autolearn-toggle-btn" class="secondary-btn btn-sm" onclick="ChatApp.toggleAutoLearn()" style="border-color: #ff5500; color: #ff5500;">
+                                <i class="fa-solid fa-toggle-off"></i> OFF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" id="learn-topic-input" placeholder="Enter topic to study (e.g. Vulkan Compute, C++23 Concurrency, OpenCV 5 API)..." style="flex: 1; min-width: 260px; background: #121316; border: 1px solid #2e303a; border-radius: 8px; padding: 9px 14px; color: #fff; font-size: 0.88rem;" onkeydown="if(event.key==='Enter') ChatApp.triggerLearnTopic()">
+                        <button class="primary-btn btn-sm" id="learn-action-btn" onclick="ChatApp.triggerLearnTopic()" style="background: var(--accent-gradient); color: #fff; font-weight: 600; padding: 9px 18px; border-radius: 8px; border: none; cursor: pointer;">
+                            <i class="fa-solid fa-graduation-cap"></i> Acquire &amp; Learn
+                        </button>
+                        <button class="secondary-btn btn-sm" onclick="ChatApp.loadLearningStats()" style="padding: 9px 14px; border-radius: 8px;">
+                            <i class="fa-solid fa-rotate"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Learning Progress Status / Terminal -->
+                <div id="learning-terminal-box" class="hidden" style="background: #0d0e12; border: 1px solid #2e303a; border-radius: 10px; padding: 14px; margin-bottom: 16px; font-family: var(--font-code); font-size: 0.82rem; color: #e2e8f0; line-height: 1.5; max-height: 220px; overflow-y: auto;">
+                    <div id="learning-terminal-content"></div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════ -->
+                <!-- 🤖 FULL AUTO MODE — V.O.I.D. AUTONOMOUS SELF-TRAINING     -->
+                <!-- ══════════════════════════════════════════════════════════ -->
+                <div style="border: 1px solid rgba(139, 92, 246, 0.4); border-radius: 14px; background: rgba(139, 92, 246, 0.06); padding: 18px; margin: 8px 0 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px;">
+                        <span style="font-weight: 700; font-size: 1rem; color: #fff; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-robot" style="color: #8b5cf6;"></i>
+                            Full Auto Mode — Autonomous Self-Training
+                            <span id="fullauto-state-badge" style="font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; background: rgba(100,100,100,0.3); color: #aaa; font-weight: 600;">IDLE</span>
+                        </span>
+                        <button id="fullauto-abort-btn" onclick="ChatApp.abortFullAuto()" class="secondary-btn btn-sm hidden" style="border-color: #ef4444; color: #ef4444;">
+                            <i class="fa-solid fa-stop"></i> Emergency Abort
+                        </button>
+                    </div>
+
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0 0 14px; line-height: 1.5;">
+                        V.O.I.D. will autonomously scout high-quality training datasets, evaluate them, and present a plan.
+                        <strong style="color: #8b5cf6;">No downloads or training will begin without your explicit authorization.</strong>
+                    </p>
+
+                    <!-- TRIGGER ROW -->
+                    <div id="fullauto-trigger-row" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <button id="fullauto-scout-btn" onclick="ChatApp.requestFullAuto()" style="background: linear-gradient(135deg, #7c3aed, #8b5cf6); color: #fff; font-weight: 700; padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: opacity 0.2s;">
+                            <i class="fa-solid fa-satellite-dish"></i> Scout Datasets
+                        </button>
+                        <button onclick="ChatApp.refreshFullAutoStatus()" style="background: transparent; border: 1px solid #3e404a; color: #aaa; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-size: 0.85rem;">
+                            <i class="fa-solid fa-rotate"></i> Refresh Status
+                        </button>
+                    </div>
+
+                    <!-- AUTHORIZATION PANEL (shown when AWAITING_AUTHORIZATION) -->
+                    <div id="fullauto-auth-panel" class="hidden" style="margin-top: 16px; background: rgba(16,16,22,0.9); border: 1px solid rgba(139, 92, 246, 0.5); border-radius: 12px; padding: 16px;">
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #c4b5fd; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-shield-halved"></i> Authorization Required — V.O.I.D. Awaits Your Approval
+                        </div>
+                        <p style="font-size: 0.82rem; color: #aaa; margin: 0 0 12px;">
+                            V.O.I.D. has identified the following datasets. Review and authorize to begin downloads and training.
+                        </p>
+                        <div id="fullauto-dataset-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; max-height: 280px; overflow-y: auto;">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                            <input type="text" id="fullauto-admin-name" placeholder="Your name (e.g. Admin)" value="Admin"
+                                style="background: #0d0e12; border: 1px solid #3e404a; border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 0.85rem; width: 180px;">
+                            <button onclick="ChatApp.authorizeFullAuto()" style="background: linear-gradient(135deg, #059669, #10b981); color: #fff; font-weight: 700; padding: 10px 22px; border-radius: 10px; border: none; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-check-circle"></i> Authorize & Begin Training
+                            </button>
+                            <button onclick="ChatApp.abortFullAuto()" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 10px 16px; border-radius: 10px; cursor: pointer;">
+                                <i class="fa-solid fa-ban"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FULL AUTO TERMINAL LOG -->
+                    <div id="fullauto-terminal" class="hidden" style="margin-top: 14px; background: #060709; border: 1px solid #1e1f28; border-radius: 10px; padding: 12px; font-family: var(--font-code); font-size: 0.78rem; color: #e2e8f0; max-height: 260px; overflow-y: auto; line-height: 1.55;">
+                        <div id="fullauto-terminal-content"></div>
+                    </div>
+
+                    <!-- DOWNLOAD PROGRESS BARS -->
+                    <div id="fullauto-progress-container" class="hidden" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="font-size: 0.8rem; font-weight: 600; color: #aaa; margin-bottom: 4px;"><i class="fa-solid fa-download"></i> Download Progress</div>
+                        <div id="fullauto-progress-bars"></div>
+                    </div>
+
+                    <!-- TRAINING STATS ROW -->
+                    <div id="fullauto-training-stats" class="hidden" style="margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                        <div style="background: rgba(16,16,22,0.9); border: 1px solid #2e303a; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.72rem; color: #aaa; margin-bottom: 4px;">Training Step</div>
+                            <div id="fullauto-step-count" style="font-size: 1.4rem; font-weight: 700; color: #8b5cf6;">0</div>
+                        </div>
+                        <div style="background: rgba(16,16,22,0.9); border: 1px solid #2e303a; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.72rem; color: #aaa; margin-bottom: 4px;">Loss</div>
+                            <div id="fullauto-loss" style="font-size: 1.4rem; font-weight: 700; color: #10b981;">—</div>
+                        </div>
+                        <div style="background: rgba(16,16,22,0.9); border: 1px solid #2e303a; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.72rem; color: #aaa; margin-bottom: 4px;">Phase</div>
+                            <div id="fullauto-phase" style="font-size: 0.85rem; font-weight: 700; color: #eab308;">IDLE</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Learning & Learned Topics Grid -->
+                <div class="learning-section-title" style="font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-clock-rotate-left" style="color: #ff5500;"></i> Recent Learning Topics
+                </div>
+                <div id="recent-learning-grid" class="recent-learning-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                    <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading knowledge records...</div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="secondary-btn" data-modal-close="#learning-modal">Close Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEMORY INSPECTOR MODAL -->
+
+    <div id="memory-modal" class="modal-backdrop hidden">
+        <div class="modal-dialog modal-large">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-brain fa-beat-fade" style="--fa-animation-duration: 2s; color: var(--accent);"></i>
+                    <span>Memory Engine Inspector</span>
+                </div>
+                <button class="icon-btn modal-close-btn" data-modal-close="#memory-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <div class="modal-body memory-modal-body">
+                <!-- Telemetry Stats Bar -->
+                <div class="memory-stats-bar" id="memory-stats-bar">
+                    <div class="stat-pill"><i class="fa-solid fa-database"></i> <span id="stat-total-mem">0</span> Memories</div>
+                    <div class="stat-pill"><i class="fa-solid fa-shield-halved"></i> 100% Offline</div>
+                    <div class="stat-pill"><i class="fa-solid fa-diagram-project"></i> <span id="stat-graph-nodes">0</span> Graph Nodes</div>
+                    <div class="stat-pill"><i class="fa-solid fa-hard-drive"></i> <span id="stat-db-size">0</span> KB</div>
+                </div>
+
+                <!-- Search & Actions Row -->
+                <div class="memory-controls-row">
+                    <div class="memory-search-wrapper">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="memory-search-input" placeholder="Search memories, facts, preferences, decisions..." oninput="ChatApp.filterMemories()">
+                    </div>
+                    <div class="memory-action-buttons">
+                        <button class="secondary-btn btn-sm" onclick="ChatApp.consolidateMemory()" title="Deduplicate and resolve memory contradictions">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Consolidate
+                        </button>
+                        <button class="secondary-btn btn-sm" onclick="ChatApp.exportMemoryData()" title="Export portable JSON">
+                            <i class="fa-solid fa-download"></i> Export
+                        </button>
+                        <button class="primary-btn btn-sm" onclick="ChatApp.showAddMemoryPrompt()">
+                            <i class="fa-solid fa-plus"></i> Add Memory
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div class="memory-tier-tabs">
+                    <button class="tier-tab active" data-tier="all" onclick="ChatApp.switchMemoryTier('all')">All</button>
+                    <button class="tier-tab" data-tier="semantic" onclick="ChatApp.switchMemoryTier('semantic')">Semantic (Facts)</button>
+                    <button class="tier-tab" data-tier="preference" onclick="ChatApp.switchMemoryTier('preference')">Preferences</button>
+                    <button class="tier-tab" data-tier="project" onclick="ChatApp.switchMemoryTier('project')">Project</button>
+                    <button class="tier-tab" data-tier="procedural" onclick="ChatApp.switchMemoryTier('procedural')">Procedural</button>
+                    <button class="tier-tab" data-tier="archived" onclick="ChatApp.switchMemoryTier('archived')">Archived</button>
+                </div>
+
+                <!-- Memory List Container -->
+                <div class="memory-cards-container" id="memory-cards-list">
+                    <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading memories...</div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="secondary-btn" data-modal-close="#memory-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- V.O.I.D. DEDICATED VISION & PERCEPTION LAUNCHER MODAL -->
+    <div id="vision-modal" class="modal-backdrop hidden">
+        <div class="modal-dialog vision-modal-dialog" style="max-width: 480px; text-align: center; padding: 28px; background: rgba(14, 18, 26, 0.95); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 16px; box-shadow: 0 16px 48px rgba(0,0,0,0.6);">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(0, 240, 255, 0.1); border: 2px solid #00f0ff; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);">
+                <i class="fa-solid fa-eye" style="font-size: 26px; color: #00f0ff;"></i>
+            </div>
+            <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px;">Dedicated Vision &amp; Subject HUD</h2>
+            <p style="font-size: 13px; color: #94a3b8; line-height: 1.55; margin-bottom: 22px;">
+                To preserve system privacy, zero background resource leakage, and strict security, webcam hardware access is isolated <strong>exclusively to the dedicated Vision page</strong>.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 12px;">
+                <button class="secondary-btn" data-modal-close="#vision-modal">Stay in Chat</button>
+                <a href="/vision" class="primary-btn" style="text-decoration: none; padding: 10px 20px; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Vision Page
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- DESKTOP GUI & MCP INTEGRATION MODAL -->
+    <div id="desktop-mcp-modal" class="modal-backdrop hidden">
+        <div class="modal-dialog modal-large" style="max-width: 960px;">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-desktop" style="color: #10b981;"></i>
+                    <span>Desktop GUI Automation &amp; Model Context Protocol (MCP)</span>
+                </div>
+                <button class="icon-btn modal-close-btn" data-modal-close="#desktop-mcp-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <div class="modal-body" style="padding: 20px;">
+                <!-- Nav Tabs -->
+                <div class="intel-nav-tabs" style="margin-bottom: 18px;">
+                    <button class="intel-tab active" id="tab-btn-desktop-wins" onclick="ChatApp.switchDesktopTab('windows')">
+                        <i class="fa-solid fa-window-restore"></i> Active Desktop Windows
+                    </button>
+                    <button class="intel-tab" id="tab-btn-desktop-actions" onclick="ChatApp.switchDesktopTab('actions')">
+                        <i class="fa-solid fa-hand-pointer"></i> Desktop Controls &amp; Actions
+                    </button>
+                    <button class="intel-tab" id="tab-btn-desktop-mcp" onclick="ChatApp.switchDesktopTab('mcp')">
+                        <i class="fa-solid fa-plug"></i> MCP Server &amp; Client Setup
+                    </button>
+                </div>
+
+                <!-- Tab 1: Active Windows -->
+                <div id="desktop-tab-windows" class="desktop-tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <div>
+                            <span style="font-weight: 600; color: #fff;">Open Applications &amp; Windows</span>
+                            <span id="desktop-window-count" style="font-size: 0.8rem; color: #10b981; margin-left: 8px;">(0 detected)</span>
+                        </div>
+                        <button class="primary-btn btn-sm" onclick="ChatApp.refreshDesktopWindows()"><i class="fa-solid fa-rotate"></i> Refresh Windows</button>
+                    </div>
+                    <div id="desktop-windows-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; max-height: 380px; overflow-y: auto;">
+                        <div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Scanning desktop windows...</div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Desktop Actions (Click, Type, Hotkey, Failsafe) -->
+                <div id="desktop-tab-actions" class="desktop-tab-content hidden">
+                    <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 10px; padding: 12px; margin-bottom: 16px; font-size: 0.85rem; color: #94a3b8;">
+                        <strong style="color: #10b981;"><i class="fa-solid fa-shield-halved"></i> Safety Guard Active:</strong> Moving the mouse to the top-left corner <code>(0, 0)</code> or pressing Escape immediately triggers an emergency failsafe abort.
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <!-- Quick Actions -->
+                        <div style="background: rgba(20, 24, 34, 0.7); border: 1px solid #2e3446; border-radius: 10px; padding: 16px;">
+                            <h4 style="color: #fff; margin-bottom: 12px; font-size: 0.95rem;"><i class="fa-solid fa-keyboard"></i> Quick Text &amp; Hotkey Injection</h4>
+                            <div style="margin-bottom: 12px;">
+                                <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Type Unicode Text into Active Window:</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="desktop-type-input" placeholder="Text to type..." style="flex: 1; background: #0f131a; border: 1px solid #334155; color: #fff; padding: 8px 12px; border-radius: 6px;">
+                                    <button class="primary-btn btn-sm" onclick="ChatApp.sendDesktopType()"><i class="fa-solid fa-paper-plane"></i> Type</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Trigger Keyboard Hotkey:</label>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button class="secondary-btn btn-sm" onclick="ChatApp.sendDesktopHotkey(['ctrl', 'c'])">Ctrl+C</button>
+                                    <button class="secondary-btn btn-sm" onclick="ChatApp.sendDesktopHotkey(['ctrl', 'v'])">Ctrl+V</button>
+                                    <button class="secondary-btn btn-sm" onclick="ChatApp.sendDesktopHotkey(['alt', 'tab'])">Alt+Tab</button>
+                                    <button class="secondary-btn btn-sm" onclick="ChatApp.sendDesktopHotkey(['win', 'r'])">Win+R</button>
+                                    <button class="secondary-btn btn-sm" onclick="ChatApp.sendDesktopHotkey(['enter'])">Enter</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Screen Preview & Screenshot -->
+                        <div style="background: rgba(20, 24, 34, 0.7); border: 1px solid #2e3446; border-radius: 10px; padding: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h4 style="color: #fff; font-size: 0.95rem;"><i class="fa-solid fa-camera"></i> Desktop Screen Capture</h4>
+                                <button class="secondary-btn btn-sm" onclick="ChatApp.captureDesktopScreen()"><i class="fa-solid fa-camera"></i> Capture</button>
+                            </div>
+                            <div id="desktop-screen-preview" style="background: #090c12; border: 1px dashed #334155; border-radius: 8px; height: 190px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                <span style="color: #64748b; font-size: 0.82rem;">Click 'Capture' to view desktop screen</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: MCP Setup & Configuration -->
+                <div id="desktop-tab-mcp" class="desktop-tab-content hidden">
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="color: #fff; margin-bottom: 6px;">Connect External AI Assistants via MCP</h4>
+                        <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5;">
+                            V.O.I.D. operates as a standard Model Context Protocol server. You can connect Claude Desktop, Cursor, Antigravity IDE, or Zed directly to V.O.I.D. to grant them local system telemetry, memory access, and desktop automation tools.
+                        </p>
+                    </div>
+
+                    <div style="background: #0b0f17; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.8rem; font-weight: 600; color: #10b981;"><i class="fa-solid fa-code"></i> Claude Desktop / Cursor Config JSON</span>
+                            <button class="secondary-btn btn-sm" onclick="ChatApp.copyMcpConfig()"><i class="fa-solid fa-copy"></i> Copy JSON</button>
+                        </div>
+                        <pre id="mcp-config-snippet" style="background: #04060a; border: 1px solid #1e2538; border-radius: 6px; padding: 12px; font-family: var(--font-code); font-size: 0.8rem; color: #38bdf8; overflow-x: auto; margin: 0;"></pre>
+                    </div>
+
+                    <div style="font-size: 0.85rem; color: #94a3b8;">
+                        <strong style="color: #fff;">Registered MCP Tools:</strong>
+                        <div id="mcp-tools-pills" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                            <span class="stat-pill">void_system_stats</span>
+                            <span class="stat-pill">void_list_windows</span>
+                            <span class="stat-pill">void_focus_window</span>
+                            <span class="stat-pill">void_desktop_action</span>
+                            <span class="stat-pill">void_take_screenshot</span>
+                            <span class="stat-pill">void_memory_search</span>
+                            <span class="stat-pill">void_execute_code</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.08); padding: 12px 20px;">
+                <button class="secondary-btn" data-modal-close="#desktop-mcp-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OFFLINE IMAGE STUDIO & GALLERY MODAL -->
+    <div id="image-studio-modal" class="modal-backdrop hidden">
+        <div class="modal-dialog modal-large" style="max-width: 960px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header" style="border-bottom: 1px solid rgba(236, 72, 153, 0.2); padding-bottom: 12px;">
+                <div class="modal-title" style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-palette" style="color: #ec4899; font-size: 1.25rem;"></i>
+                    <span style="font-weight: 700; color: #fff;">Offline Image Studio &amp; Gallery</span>
+                    <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3);"><i class="fa-solid fa-shield-halved"></i> 100% Offline</span>
+                    <span style="font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);"><i class="fa-solid fa-microchip"></i> 4GB VRAM Guarded</span>
+                </div>
+                <button class="icon-btn modal-close-btn" data-modal-close="#image-studio-modal"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div style="display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 10px 20px 0; background: rgba(0,0,0,0.2);">
+                <button class="tier-tab active" id="tab-btn-image-create" onclick="ChatApp.switchStudioTab('create')" style="padding: 8px 16px; font-size: 0.88rem;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Synthesize Image
+                </button>
+                <button class="tier-tab" id="tab-btn-image-gallery" onclick="ChatApp.switchStudioTab('gallery')" style="padding: 8px 16px; font-size: 0.88rem;">
+                    <i class="fa-solid fa-images"></i> Image Gallery (<span id="gallery-badge-count">0</span>)
+                </button>
+                <button class="tier-tab" id="tab-btn-image-settings" onclick="ChatApp.switchStudioTab('settings')" style="padding: 8px 16px; font-size: 0.88rem;">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Retention Policy
+                </button>
+            </div>
+
+            <div class="modal-body" style="padding: 20px; overflow-y: auto; flex: 1;">
+                <!-- TAB 1: SYNTHESIS STUDIO -->
+                <div id="studio-pane-create" class="studio-pane">
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #e2e8f0; margin-bottom: 6px;">
+                                Concept Prompt:
+                            </label>
+                            <textarea id="studio-prompt-input" rows="3" placeholder="Describe the image you want to generate offline (e.g. Cybernetic holographic core in a futuristic server room, violet and cyan neon lights, 8k resolution, raytracing)..." style="width: 100%; background: #0c0f17; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 10px 14px; color: #fff; font-size: 0.9rem; resize: vertical; box-sizing: border-box;"></textarea>
+                        </div>
+
+                        <!-- Style Preset Chips -->
+                        <div>
+                            <label style="display: block; font-size: 0.82rem; color: #94a3b8; margin-bottom: 6px;">Visual Style Preset:</label>
+                            <div id="studio-style-chips" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <button type="button" class="chip active" data-style="none" onclick="ChatApp.selectImageStyle('none', this)">None (Raw)</button>
+                                <button type="button" class="chip" data-style="cyberpunk" onclick="ChatApp.selectImageStyle('cyberpunk', this)">⚡ Cyberpunk</button>
+                                <button type="button" class="chip" data-style="photorealistic" onclick="ChatApp.selectImageStyle('photorealistic', this)">📷 Photorealistic</button>
+                                <button type="button" class="chip" data-style="cinematic" onclick="ChatApp.selectImageStyle('cinematic', this)">🎬 Cinematic Film</button>
+                                <button type="button" class="chip" data-style="anime" onclick="ChatApp.selectImageStyle('anime', this)">🌸 Anime Concept</button>
+                                <button type="button" class="chip" data-style="3d_render" onclick="ChatApp.selectImageStyle('3d_render', this)">🔮 3D Octane Render</button>
+                                <button type="button" class="chip" data-style="oil_painting" onclick="ChatApp.selectImageStyle('oil_painting', this)">🎨 Oil Painting</button>
+                                <button type="button" class="chip" data-style="minimalist" onclick="ChatApp.selectImageStyle('minimalist', this)">📐 Minimalist Vector</button>
+                            </div>
+                        </div>
+
+                        <!-- Technical Settings Row -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px;">
+                            <div>
+                                <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Resolution / Aspect:</label>
+                                <select id="studio-aspect-select" style="width: 100%; background: #0c0f17; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 0.85rem;">
+                                    <option value="512x512" selected>512×512 (1:1 Square • Recommended for 4GB VRAM)</option>
+                                    <option value="768x512">768×512 (3:2 Landscape)</option>
+                                    <option value="512x768">512×768 (2:3 Portrait)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Seed (Blank = Random):</label>
+                                <input type="number" id="studio-seed-input" placeholder="Random" style="width: 100%; background: #0c0f17; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 0.85rem; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px;">Negative Prompt:</label>
+                                <input type="text" id="studio-neg-input" value="blurry, low quality, artifacts" style="width: 100%; background: #0c0f17; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 0.85rem; box-sizing: border-box;">
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                            <button class="primary-btn" id="studio-generate-btn" onclick="ChatApp.generateStudioImage()" style="background: linear-gradient(135deg, #ec4899, #8b5cf6); border: none; padding: 10px 24px; font-size: 0.95rem; font-weight: 600; border-radius: 8px;">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Synthesize Image (100% Offline)
+                            </button>
+                        </div>
+
+                        <!-- Live Output Container -->
+                        <div id="studio-output-box" class="hidden" style="margin-top: 10px; background: #090c13; border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 10px; padding: 16px; text-align: center;">
+                            <div id="studio-loading" class="hidden" style="padding: 30px 0;">
+                                <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 2rem; color: #ec4899; margin-bottom: 12px;"></i>
+                                <p style="font-size: 0.9rem; color: #e2e8f0; margin: 0;">Executing offline neural synthesis on local GPU...</p>
+                                <span style="font-size: 0.78rem; color: #94a3b8;">4GB VRAM guarded • Zero cloud requests</span>
+                            </div>
+                            <div id="studio-result-view" class="hidden">
+                                <img id="studio-result-img" src="" alt="Generated artwork" style="max-height: 380px; max-width: 100%; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); margin-bottom: 14px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+                                    <div style="text-align: left;">
+                                        <div id="studio-meta-prompt" style="font-size: 0.88rem; font-weight: 600; color: #fff; margin-bottom: 4px;"></div>
+                                        <div id="studio-meta-details" style="font-size: 0.78rem; color: #94a3b8;"></div>
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="secondary-btn btn-sm" onclick="ChatApp.copyGeneratedPrompt()"><i class="fa-solid fa-copy"></i> Copy Prompt</button>
+                                        <a id="studio-download-link" href="#" download class="primary-btn btn-sm" style="text-decoration: none;"><i class="fa-solid fa-download"></i> Download PNG</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: GALLERY VIEW -->
+                <div id="studio-pane-gallery" class="studio-pane hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
+                        <div class="memory-search-wrapper" style="flex: 1; min-width: 260px;">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="gallery-search-input" placeholder="Search generated image prompts..." oninput="ChatApp.searchGallery(this.value)">
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span id="gallery-retention-notice" style="font-size: 0.8rem; color: #94a3b8;"><i class="fa-solid fa-shield-halved" style="color: #10b981;"></i> Auto-purge: 7 days</span>
+                            <button class="secondary-btn btn-sm" onclick="ChatApp.loadGallery()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Gallery Grid -->
+                    <div id="studio-gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px;">
+                        <div style="color: #94a3b8; font-size: 0.88rem; grid-column: 1/-1; text-align: center; padding: 40px 0;">Loading offline image gallery...</div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: RETENTION & SETTINGS -->
+                <div id="studio-pane-settings" class="studio-pane hidden">
+                    <div style="display: flex; flex-direction: column; gap: 18px; max-width: 600px;">
+                        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px;">
+                            <h4 style="color: #fff; margin-bottom: 8px; font-size: 0.95rem;"><i class="fa-solid fa-clock-rotate-left" style="color: #ec4899;"></i> Auto-Purge Retention Policy</h4>
+                            <p style="font-size: 0.85rem; color: #94a3b8; line-height: 1.5; margin-bottom: 14px;">
+                                Automatically deletes generated images older than the specified retention window to conserve host disk space. Set to 0 to keep all generated images permanently.
+                            </p>
+
+                            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+                                <label style="font-size: 0.88rem; color: #e2e8f0; min-width: 130px;">Retention Days:</label>
+                                <input type="number" id="setting-retention-days" min="0" max="365" value="7" style="width: 90px; background: #0c0f17; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 0.9rem;">
+                                <span style="font-size: 0.8rem; color: #64748b;">(0 = Never purge / Permanent)</span>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                                <input type="checkbox" id="setting-autopurge-enabled" checked style="accent-color: #ec4899; cursor: pointer;">
+                                <label for="setting-autopurge-enabled" style="font-size: 0.85rem; color: #cbd5e1; cursor: pointer;">Enable automatic background purge on startup &amp; generation</label>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button class="primary-btn btn-sm" onclick="ChatApp.saveImageSettings()"><i class="fa-solid fa-check"></i> Save Retention Policy</button>
+                                <button class="secondary-btn btn-sm" onclick="ChatApp.triggerPurgeNow()" style="border-color: #f59e0b; color: #f59e0b;"><i class="fa-solid fa-broom"></i> Purge Expired Now</button>
+                            </div>
+                        </div>
+
+                        <!-- System Hardware Telemetry -->
+                        <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 18px;">
+                            <h4 style="color: #fff; margin-bottom: 8px; font-size: 0.95rem;"><i class="fa-solid fa-server" style="color: #38bdf8;"></i> Offline Hardware Diagnostics</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.82rem;">
+                                <div style="color: #94a3b8;">GPU Hardware: <strong style="color: #fff;">NVIDIA RTX 3050 Laptop (4GB)</strong></div>
+                                <div style="color: #94a3b8;">Operating Mode: <strong style="color: #10b981;">100% Offline</strong></div>
+                                <div style="color: #94a3b8;">Storage Directory: <strong style="color: #fff;">static/generated/images/</strong></div>
+                                <div style="color: #94a3b8;">VRAM Safety Policy: <strong style="color: #ec4899;">Guarded (&lt;2.8 GB limit)</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+                <button class="secondary-btn" data-modal-close="#image-studio-modal">Close Studio</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/chat.js?v=6.3"></script>
+</body>
+</html>

@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121316">
+    <title>V.O.I.D. | Vision &amp; Subject Perception</title>
+    <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+    <link rel="alternate icon" type="image/png" href="/static/favicon.png">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/chat.css?v=5.1">
+    <style>
+        /* ============================================================
+           👁️ V.O.I.D. VISION & SUBJECT INTELLIGENCE DASHBOARD STYLES
+           Aligned strictly to main page tokens (--bg-app, --accent-color)
+           ============================================================ */
+        
+        .vision-viewport {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .vision-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        @media (max-width: 1100px) {
+            .vision-grid {
+                grid-template-columns: 1fr;
+            }
+            .vision-viewport {
+                padding: 16px 14px;
+            }
+        }
+
+        /* --- Left Column: Video Viewport & Reasoning --- */
+        .vision-col-left {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- Right Column: Subject Dossier Tabs --- */
+        .vision-col-right {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Card Container (Matching V.O.I.D. Card Surface) */
+        .vision-card {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .vision-card:hover {
+            border-color: rgba(255, 85, 0, 0.35);
+        }
+
+        .vision-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .vision-card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .vision-card-title i {
+            color: var(--accent-color);
+        }
+
+        /* Live Optical Viewport Frame */
+        .viewport-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #08090b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .viewport-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Reticles / Cyber Overlays */
+        .reticle-corner {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            pointer-events: none;
+            border-color: var(--accent-color);
+            opacity: 0.85;
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+        .reticle-tl { top: 12px; left: 12px; border-top: 2px solid var(--accent-color); border-left: 2px solid var(--accent-color); }
+        .reticle-tr { top: 12px; right: 12px; border-top: 2px solid var(--accent-color); border-right: 2px solid var(--accent-color); }
+        .reticle-bl { bottom: 12px; left: 12px; border-bottom: 2px solid var(--accent-color); border-left: 2px solid var(--accent-color); }
+        .reticle-br { bottom: 12px; right: 12px; border-bottom: 2px solid var(--accent-color); border-right: 2px solid var(--accent-color); }
+
+        /* Shutter Flash Animation */
+        .shutter-flash {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.85);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.08s ease-out;
+            z-index: 20;
+        }
+        .shutter-flash.active {
+            opacity: 1;
+        }
+
+        /* Standby Offline Placeholder */
+        .offline-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            gap: 14px;
+            z-index: 2;
+        }
+
+        .offline-placeholder .welcome-logo-halo {
+            margin-bottom: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+        }
+
+        .offline-placeholder h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .offline-placeholder p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            max-width: 360px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* Viewport Bottom Toolbar */
+        .viewport-toolbar {
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.015);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .toolbar-left, .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .telemetry-pill {
+            font-family: var(--font-code);
+            font-size: 0.76rem;
+            color: var(--text-primary);
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .telemetry-pill.live {
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #34d399;
+        }
+
+        .telemetry-pill.live .dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            box-shadow: 0 0 6px #10b981;
+            border-radius: 50%;
+            animation: none;
+        }
+
+        /* --- Cognitive Visual Reasoning Console (Matching Chat Prompt) --- */
+        .reasoning-card {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .reasoning-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reasoning-header h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .reasoning-input-wrapper {
+            background: var(--bg-input);
+            border-radius: 20px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--border-color);
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .reasoning-input-wrapper:focus-within {
+            border-color: var(--accent-color);
+            background: var(--bg-app);
+            box-shadow: 0 0 12px rgba(255, 85, 0, 0.15);
+        }
+
+        .reasoning-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            font-size: 0.92rem;
+            padding: 8px 4px;
+            outline: none;
+        }
+
+        .reasoning-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .reasoning-suggestions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .reasoning-suggestions .chip {
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            border-radius: 14px;
+        }
+
+        .reasoning-response-box {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .reasoning-response-box.empty {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.82rem;
+        }
+
+        /* --- Right Column: Subject Dossier & Tabs --- */
+        .intel-nav-tabs {
+            display: flex;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .intel-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 16px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            font-family: var(--font-main);
+        }
+
+        .intel-tab:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .intel-tab.active {
+            background: var(--accent-color);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(255, 85, 0, 0.35);
+        }
+
+        .tab-pane {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeIn 0.25s ease-out;
+        }
+        .tab-pane.active {
+            display: flex;
+        }
+
+        /* Primary Subject Identity Card */
+        .subject-identity-card {
+            background: var(--bg-sidebar);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subject-identity-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent-gradient);
+        }
+
+        .subject-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .subject-avatar-ring {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: radial-gradient(circle at 50% 40%, #1e1f26 0%, #101114 100%);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            flex-shrink: 0;
+        }
+
+        .subject-avatar-ring.owner {
+            border-color: #10b981;
+            color: #10b981;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .subject-avatar-ring.known {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 16px rgba(255, 85, 0, 0.3);
+        }
+
+        .subject-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .subject-name-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .subject-name-text {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .subject-role-badge {
+            font-family: var(--font-code);
+            font-size: 0.68rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .subject-role-badge.owner {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #10b981;
+            color: #34d399;
+        }
+
+        .subject-role-badge.known {
+            background: rgba(255, 85, 0, 0.15);
+            border: 1px solid var(--accent-color);
+            color: #ff751a;
+        }
+
+        .subject-role-badge.guest {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .subject-desc-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .subject-conf-box {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .subject-conf-val {
+            font-family: var(--font-code);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .subject-conf-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Metric Grid & Metric Box (Matching .stat-card) */
+        .metric-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .metric-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .metric-grid-3, .metric-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric-card-box {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: border-color 0.2s;
+        }
+
+        .metric-card-box:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-label-row {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .metric-label-row i {
+            color: var(--accent-color);
+            font-size: 0.8rem;
+        }
+
+        .metric-val-large {
+            font-family: var(--font-code);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-val-large.highlight {
+            color: var(--accent-color);
+        }
+
+        /* Open Vocabulary Preset Chips */
+        .vocab-preset-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.68rem;
+            font-weight: 500;
+            padding: 3px 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .vocab-preset-chip:hover {
+            border-color: var(--accent-color);
+            color: var(--text-primary);
+        }
+        .vocab-preset-chip.active {
+            background: rgba(0, 240, 255, 0.15);
+            border-color: var(--accent-color);
+            color: #00f0ff;
+            font-weight: 600;
+        }
+
+        /* Attire Color Specimen */
+        .color-specimen-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-top: 10px;
+        }
+
+        .color-swatch-disc {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+            flex-shrink: 0;
+            transition: background-color 0.4s ease;
+        }
+
+        .color-specimen-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .color-specimen-name {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .color-specimen-hex {
+            font-family: var(--font-code);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Tags and Gesture Chips */
+        .items-chips-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .item-tag {
+            background: rgba(255, 85, 0, 0.08);
+            border: 1px solid rgba(255, 85, 0, 0.25);
+            color: var(--text-primary);
+            font-size: 0.78rem;
+            padding: 4px 10px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .item-tag.gesture {
+            background: rgba(56, 189, 248, 0.08);
+            border-color: rgba(56, 189, 248, 0.25);
+            color: #7dd3fc;
+        }
+
+        /* Synthesized Narrative Banner */
+        .narrative-bubble {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* Profiles List & Memory Table */
+        .profile-row-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .vision-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        .vision-table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+        }
+
+        .vision-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+        }
+
+        .vision-table tr:hover td {
+            background: var(--bg-hover);
+        }
+    </style>
+</head>
+<body class="theme-dark" data-theme="dark">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+
+    <div class="app-container">
+        
+        <!-- ============================================================
+             LEFT SIDEBAR: Matches Main Page UI/UX Shell & V.O.I.D. Controls
+             ============================================================ -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="logo-area">
+                    <img src="/static/void-symbol.svg" alt="V.O.I.D. Logo" class="void-brand-symbol">
+                    <div class="brand-text-block">
+                        <span class="brand-title">V.O.I.D.</span>
+                        <span class="brand-subtitle">V.O.I.D. PERCEPTION</span>
+                    </div>
+                </a>
+                <button id="toggle-sidebar-btn" class="icon-btn mobile-only" aria-label="Close Sidebar"><i class="fa-solid fa-times"></i></button>
+            </div>
+
+            <!-- Primary Action: Return to Chat -->
+            <a href="/" class="new-chat-btn" onclick="VisionPage.returnToChat()" style="text-decoration: none; justify-content: center; gap: 10px; margin-bottom: 15px;">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Return to Chat</span>
+            </a>
+
+            <!-- Hardware Controls -->
+            <div class="history-label">Hardware Sensor</div>
+            
+            <button id="camera-power-btn" class="primary-btn" style="width: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px; margin-top: 8px; margin-bottom: 12px;" onclick="VisionPage.toggleCamera()">
+                <i class="fa-solid fa-power-off"></i>
+                <span id="power-btn-label">Activate Optical Feed</span>
+            </button>
+
+            <label style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block;">Video Device</label>
+            <select id="camera-select" style="width: 100%; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 9px 10px; font-family: var(--font-main); font-size: 0.82rem; margin-bottom: 12px; outline: none;" onchange="VisionPage.switchCamera(this.value)">
+                <option value="0">Camera 0 (Default)</option>
+            </select>
+
+            <label style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block;">Neural Object Model</label>
+            <select id="model-select" style="width: 100%; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 9px 10px; font-family: var(--font-main); font-size: 0.82rem; margin-bottom: 12px; outline: none;" onchange="VisionPage.switchModel(this.value)">
+                <option value="yolov8s-worldv2.pt">YOLO-World v2 (Open-Vocab 2M+ Objects)</option>
+                <option value="yolo11n.pt">YOLO11 Nano (Next-Gen MOT)</option>
+                <option value="yolov8n.pt">YOLOv8 Nano (Standard)</option>
+            </select>
+
+            <!-- Open-Vocabulary Target Control Panel -->
+            <div id="vocab-controls-container" style="display: none; background: rgba(0,240,255,0.03); border: 1px solid rgba(0,240,255,0.2); border-radius: 10px; padding: 10px; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 0.74rem; font-weight: 600; color: var(--accent-color); text-transform: uppercase; letter-spacing: 0.5px;">
+                        <i class="fa-solid fa-infinity" style="margin-right: 5px;"></i> Open Vocabulary
+                    </span>
+                    <span id="vocab-count-badge" style="font-family: var(--font-code); font-size: 0.7rem; background: rgba(0,240,255,0.15); color: #00f0ff; padding: 2px 6px; border-radius: 12px;">2M+ Categories</span>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 8px;">
+                    Zero-shot detection for millions of real-world objects. Select preset or add custom target prompts:
+                </div>
+                <!-- Preset Chips -->
+                <div id="vocab-preset-chips" style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;">
+                    <button type="button" class="vocab-preset-chip active" onclick="VisionPage.applyVocabPreset('All', this)">All</button>
+                    <button type="button" class="vocab-preset-chip" onclick="VisionPage.applyVocabPreset('Everyday Carry', this)">EDC</button>
+                    <button type="button" class="vocab-preset-chip" onclick="VisionPage.applyVocabPreset('Desk & Office', this)">Desk</button>
+                    <button type="button" class="vocab-preset-chip" onclick="VisionPage.applyVocabPreset('Tech & Electronics', this)">Tech</button>
+                    <button type="button" class="vocab-preset-chip" onclick="VisionPage.applyVocabPreset('Tools & Hardware', this)">Tools</button>
+                    <button type="button" class="vocab-preset-chip" onclick="VisionPage.applyVocabPreset('Food & Drinkware', this)">Food</button>
+                </div>
+                <!-- Custom Object Prompt Input -->
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="custom-vocab-input" placeholder="e.g. airpods, passport, scissors" style="flex: 1; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 8px; font-size: 0.75rem; outline: none;" onkeydown="if(event.key==='Enter') VisionPage.addCustomVocab()">
+                    <button type="button" class="primary-btn" style="padding: 6px 10px; font-size: 0.75rem; border-radius: 8px; cursor: pointer;" onclick="VisionPage.addCustomVocab()" title="Add Custom Object">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+                <div id="vocab-status-indicator" style="font-size: 0.68rem; color: var(--text-muted); margin-top: 5px; min-height: 14px;"></div>
+            </div>
+
+            <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: var(--text-primary); cursor: pointer; padding: 8px 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 18px;">
+                <span><i class="fa-solid fa-crosshairs" style="color: var(--accent-color); margin-right: 8px;"></i> HUD Reticles</span>
+                <input type="checkbox" id="hud-toggle" checked onchange="VisionPage.toggleHud(this.checked)" style="accent-color: var(--accent-color); width: 15px; height: 15px; cursor: pointer;">
+            </label>
+
+            <!-- Stream Performance Modes -->
+            <div class="history-label">Streaming Rates</div>
+            <div class="intel-nav-tabs" style="flex-direction: column; gap: 4px; padding: 4px; margin-top: 8px; margin-bottom: 18px;">
+                <button class="intel-tab mode-btn" data-mode="ECO" onclick="VisionPage.setMode('ECO')" style="justify-content: space-between; width: 100%; padding: 7px 12px;">
+                    <span style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-leaf"></i> ECO</span>
+                    <span style="font-family: var(--font-code); font-size: 0.72rem; opacity: 0.8;">15 FPS</span>
+                </button>
+                <button class="intel-tab mode-btn active" data-mode="BALANCED" onclick="VisionPage.setMode('BALANCED')" style="justify-content: space-between; width: 100%; padding: 7px 12px;">
+                    <span style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-sliders"></i> BALANCED</span>
+                    <span style="font-family: var(--font-code); font-size: 0.72rem; opacity: 0.8;">30 FPS</span>
+                </button>
+                <button class="intel-tab mode-btn" data-mode="TURBO" onclick="VisionPage.setMode('TURBO')" style="justify-content: space-between; width: 100%; padding: 7px 12px;">
+                    <span style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-bolt"></i> TURBO</span>
+                    <span style="font-family: var(--font-code); font-size: 0.72rem; opacity: 0.8;">60 FPS</span>
+                </button>
+            </div>
+
+            <!-- Quick Tool Actions -->
+            <div class="history-label">Quick Actions</div>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px; flex: 1;">
+                <button class="menu-item" onclick="VisionPage.takeSnapshot()">
+                    <i class="fa-solid fa-camera" style="color: var(--accent-color);"></i>
+                    <span>Capture Snapshot</span>
+                </button>
+                <button class="menu-item" onclick="VisionPage.scanScene()">
+                    <i class="fa-solid fa-brain" style="color: #38bdf8;"></i>
+                    <span>Cognitive Scene Scan</span>
+                </button>
+                <button class="menu-item" onclick="VisionPage.openEnrollModal()">
+                    <i class="fa-solid fa-user-plus" style="color: #10b981;"></i>
+                    <span>Enroll Identity</span>
+                </button>
+            </div>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <a href="/" class="menu-item" onclick="VisionPage.returnToChat()" style="text-decoration: none; color: inherit;">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>Chat Console</span>
+                </a>
+                <button class="menu-item" onclick="VisionPage.toggleTheme()">
+                    <i id="theme-icon" class="fa-solid fa-sun"></i>
+                    <span>Toggle Theme</span>
+                </button>
+                <button class="menu-item" onclick="VisionPage.clearMemory()">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Clear Visual Memory</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ============================================================
+             MAIN CONTENT: Top Bar & Dashboard Viewport
+             ============================================================ -->
+        <main class="main-content">
+            
+            <!-- Top Bar Header (Matches Chat App Top Bar) -->
+            <header class="top-bar">
+                <button id="mobile-menu-btn" class="icon-btn mobile-only"><i class="fa-solid fa-bars"></i></button>
+                
+                <div class="model-status">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span class="status-text" id="status-text">V.O.I.D. Vision &amp; Subject Perception Active</span>
+                    <span id="network-badge" class="network-badge offline" title="Offline-First Engine">
+                        <i class="fa-solid fa-shield-halved"></i> <span>100% Local Engine</span>
+                    </span>
+                    <span id="nav-status-badge" class="network-badge" style="background: rgba(255, 85, 0, 0.1); border: 1px solid rgba(255, 85, 0, 0.35); color: var(--accent-color);">
+                        <i class="fa-solid fa-lock"></i> <span>EXCLUSIVE CAMERA SESSION</span>
+                    </span>
+                </div>
+
+                <div class="top-actions">
+                    <button class="icon-btn" title="Capture Snapshot" onclick="VisionPage.takeSnapshot()"><i class="fa-solid fa-camera"></i></button>
+                    <button class="icon-btn" title="Toggle Fullscreen" onclick="VisionPage.toggleFullscreen()"><i class="fa-solid fa-expand"></i></button>
+                    <a href="/" class="icon-btn" title="Return to Chat Console" onclick="VisionPage.returnToChat()" style="text-decoration: none;"><i class="fa-solid fa-comments"></i></a>
+                    <div class="user-avatar" title="V.O.I.D. Operator">V</div>
+                </div>
+            </header>
+
+            <!-- Vision Dashboard Viewport -->
+            <div class="vision-viewport">
+                
+                <div class="vision-grid">
+                    
+                    <!-- ==========================================
+                         LEFT COLUMN: Live Cam View & Q&A
+                         ========================================== -->
+                    <div class="vision-col-left">
+                        
+                        <!-- Live Optical Card -->
+                        <div class="vision-card" id="feed-card">
+                            <div class="vision-card-header">
+                                <div class="vision-card-title">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span>Live Optical Viewport</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="telemetry-pill live" id="stream-status-pill">
+                                        <span class="dot"></span>
+                                        <span id="overlay-tag-fps">30.0 FPS</span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Video Frame -->
+                            <div class="viewport-frame" id="viewport-frame-container">
+                                <!-- Reticles -->
+                                <div class="reticle-corner reticle-tl"></div>
+                                <div class="reticle-corner reticle-tr"></div>
+                                <div class="reticle-corner reticle-bl"></div>
+                                <div class="reticle-corner reticle-br"></div>
+                                <div class="shutter-flash" id="shutter-flash"></div>
+
+                                <!-- Live Video Stream -->
+                                <img id="video-stream-img" alt="V.O.I.D. Live Camera Feed">
+
+                                <!-- Offline Privacy Shield Placeholder -->
+                                <div class="offline-placeholder" id="offline-placeholder">
+                                    <div class="welcome-logo-halo">
+                                        <img src="/static/void-symbol.svg" alt="V.O.I.D." class="welcome-symbol-img" style="width: 48px; height: 36px;">
+                                    </div>
+                                    <h3>Optical Sensors Suspended</h3>
+                                    <p>Camera access is granted strictly to this page. Click below to activate live optical telemetry.</p>
+                                    <button class="primary-btn" style="padding: 9px 20px; border-radius: 16px; font-size: 0.85rem;" onclick="VisionPage.toggleCamera(true)">
+                                        <i class="fa-solid fa-play"></i> Activate Camera
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Viewport Toolbar -->
+                            <div class="viewport-toolbar">
+                                <div class="toolbar-left">
+                                    <span class="telemetry-pill" id="diag-res">640 &times; 480</span>
+                                    <span class="telemetry-pill" id="diag-mode-pill">BALANCED // 30 FPS</span>
+                                </div>
+                                <div class="toolbar-right">
+                                    <button class="icon-btn" title="Capture Snapshot" onclick="VisionPage.takeSnapshot()"><i class="fa-solid fa-camera"></i></button>
+                                    <button class="icon-btn" title="Cognitive Scene Scan" onclick="VisionPage.scanScene()"><i class="fa-solid fa-brain"></i></button>
+                                    <button class="icon-btn" title="Toggle Fullscreen" onclick="VisionPage.toggleFullscreen()"><i class="fa-solid fa-expand"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cognitive Visual Reasoning Console (Matching Chat Prompt Bar) -->
+                        <div class="reasoning-card">
+                            <div class="reasoning-header">
+                                <h4><i class="fa-solid fa-brain" style="color: var(--accent-color);"></i> Cognitive Visual Reasoning</h4>
+                                <span style="font-family: var(--font-code); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Zero-Latency Local</span>
+                            </div>
+
+                            <div class="reasoning-input-wrapper">
+                                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); margin-left: 6px;"></i>
+                                <input type="text" id="qa-query-input" class="reasoning-input" placeholder="Ask V.O.I.D. about the subject, attire, actions, or objects in view..." onkeydown="if(event.key==='Enter') VisionPage.askQuestion()">
+                                <button class="icon-btn send-btn" onclick="VisionPage.askQuestion()" title="Execute reasoning query">
+                                    <i class="fa-solid fa-arrow-up"></i>
+                                </button>
+                            </div>
+
+                            <div class="reasoning-suggestions">
+                                <div class="chip" onclick="VisionPage.quickAsk('What is the subject holding or near?')">📱 Held Items</div>
+                                <div class="chip" onclick="VisionPage.quickAsk('Describe the primary subject in detail.')">👤 Subject Details</div>
+                                <div class="chip" onclick="VisionPage.quickAsk('What is the subject\'s mood and expression?')">😊 Mood &amp; Gaze</div>
+                                <div class="chip" onclick="VisionPage.quickAsk('What color is the subject\'s clothing?')">🎨 Attire Color</div>
+                                <div class="chip" onclick="VisionPage.quickAsk('Describe all objects on the desk.')">💻 Desk Objects</div>
+                            </div>
+
+                            <div id="qa-response-box" class="reasoning-response-box empty">
+                                <div class="avatar-void" style="margin-top: 0;"><img src="/static/void-symbol.svg" alt="V.O.I.D." class="void-avatar-icon"></div>
+                                <div style="flex: 1;" id="qa-response-text">Ask any question above to execute natural language reasoning over the live visual feed...</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ==========================================
+                         RIGHT COLUMN: Subject Dossier & Tabs
+                         ========================================== -->
+                    <div class="vision-col-right">
+                        
+                        <!-- Navigation Tabs (Matching .intel-nav-tabs) -->
+                        <div class="intel-nav-tabs">
+                            <button class="intel-tab active" data-tab="subject" onclick="VisionPage.switchTab('subject')">
+                                <i class="fa-solid fa-user-astronaut"></i> Subject Dossier
+                            </button>
+                            <button class="intel-tab" data-tab="telemetry" onclick="VisionPage.switchTab('telemetry')">
+                                <i class="fa-solid fa-chart-simple"></i> Scene Telemetry
+                            </button>
+                            <button class="intel-tab" data-tab="profiles" onclick="VisionPage.switchTab('profiles')">
+                                <i class="fa-solid fa-id-badge"></i> Profiles
+                            </button>
+                            <button class="intel-tab" data-tab="memory" onclick="VisionPage.switchTab('memory')">
+                                <i class="fa-solid fa-clock-rotate-left"></i> Memory
+                            </button>
+                        </div>
+
+                        <!-- TAB 1: COMPREHENSIVE SUBJECT DOSSIER -->
+                        <div class="tab-pane active" id="pane-subject">
+                            
+                            <!-- Primary Subject Identity Banner -->
+                            <div class="subject-identity-card" id="subject-banner">
+                                <div class="subject-left">
+                                    <div class="subject-avatar-ring" id="subject-avatar">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div class="subject-info">
+                                        <div class="subject-name-row">
+                                            <span class="subject-name-text" id="subj-name">Scanning Viewport...</span>
+                                            <span class="subject-role-badge guest" id="subj-role">STANDBY</span>
+                                            <span class="subject-role-badge" id="subj-liveness-badge" style="display: none; font-size: 0.68rem; padding: 2px 7px;">3D LIVE</span>
+                                        </div>
+                                        <span class="subject-desc-text" id="subj-status-desc">Awaiting human presence in optical view.</span>
+                                    </div>
+                                </div>
+                                <div class="subject-conf-box">
+                                    <span class="subject-conf-val" id="subj-conf">--%</span>
+                                    <span class="subject-conf-label">Biometric Match</span>
+                                </div>
+                            </div>
+
+                            <!-- Spatial Geometry & Proximity -->
+                            <div class="vision-card" style="padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span style="font-size: 0.86rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                        <i class="fa-solid fa-ruler-combined" style="color: var(--accent-color);"></i> Spatial Geometry &amp; Proximity
+                                    </span>
+                                    <span id="subj-dwell-tag" style="font-family: var(--font-code); font-size: 0.74rem; color: var(--accent-color);">DWELL: 00:00</span>
+                                </div>
+
+                                <div class="metric-grid-3" style="margin-bottom: 10px;">
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-person-arrow-down-to-line"></i> Distance</div>
+                                        <div class="metric-val-large highlight" id="subj-dist">-- m</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-crosshairs"></i> Offset</div>
+                                        <div class="metric-val-large" id="subj-offset">Centered</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-up-right-and-down-left-from-center"></i> Viewport Area</div>
+                                        <div class="metric-val-large" id="subj-coverage">--%</div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-grid-2">
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-arrows-to-eye"></i> Head Pose</div>
+                                        <div class="metric-val-large" id="subj-pose" style="font-size: 0.92rem;">Frontal (0&deg;)</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-vector-square"></i> Coordinates</div>
+                                        <div class="metric-val-large" id="subj-coords" style="font-size: 0.85rem;">X: --, Y: --</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cognitive State, Mood & Attire Signature -->
+                            <div class="vision-card" style="padding: 16px;">
+                                <div style="font-size: 0.86rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                    <i class="fa-solid fa-smile-beam" style="color: var(--accent-color);"></i> Cognitive State &amp; Attire Signature
+                                </div>
+
+                                <div class="metric-grid-3">
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-face-smile"></i> Mood</div>
+                                        <div class="metric-val-large highlight" id="subj-mood" style="font-size: 0.95rem;">Neutral</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-eye"></i> Gaze Direction</div>
+                                        <div class="metric-val-large" id="subj-gaze" style="font-size: 0.95rem;">Direct Focus</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-sun"></i> Face Exposure</div>
+                                        <div class="metric-val-large" id="subj-exposure" style="font-size: 0.95rem;">Optimal</div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-grid-3" style="margin-top: 10px;">
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-bullseye"></i> Attention Index</div>
+                                        <div class="metric-val-large highlight" id="subj-attention" style="font-size: 0.95rem;">--%</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-bed"></i> Fatigue State</div>
+                                        <div class="metric-val-large" id="subj-fatigue" style="font-size: 0.85rem;">Alert</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-shield-halved"></i> 3D Liveness</div>
+                                        <div class="metric-val-large highlight" id="subj-liveness-val" style="font-size: 0.85rem;">--</div>
+                                    </div>
+                                </div>
+
+                                <!-- Dominant Attire Color Specimen -->
+                                <div class="color-specimen-row">
+                                    <div class="color-swatch-disc" id="color-swatch" style="background-color: #334155;"></div>
+                                    <div class="color-specimen-info">
+                                        <span class="color-specimen-name" id="color-name">Sampling Clothing Color...</span>
+                                        <span class="color-specimen-hex" id="color-hex">#334155</span>
+                                    </div>
+                                    <button class="primary-btn" style="padding: 5px 12px; font-size: 0.75rem; border-radius: 12px;" onclick="VisionPage.openEnrollModal()">
+                                        <i class="fa-solid fa-user-plus"></i> Claim Profile
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Activity, Gestures & Vicinity Items -->
+                            <div class="vision-card" style="padding: 16px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span style="font-size: 0.86rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                        <i class="fa-solid fa-hand-holding" style="color: var(--accent-color);"></i> Activity &amp; Vicinity Items
+                                    </span>
+                                    <span id="items-count-badge" class="telemetry-pill">0 ITEMS</span>
+                                </div>
+
+                                <div class="metric-grid-2" style="margin-bottom: 10px;">
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-person-running"></i> Motion Delta</div>
+                                        <div class="metric-val-large" id="subj-motion" style="font-size: 0.92rem;">Stationary</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-hand"></i> Gesture</div>
+                                        <div class="metric-val-large highlight" id="subj-gesture-text" style="font-size: 0.92rem;">None Detected</div>
+                                    </div>
+                                </div>
+
+                                <div class="items-chips-grid" id="subj-items-tags">
+                                    <span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">No vicinity items detected in range.</span>
+                                </div>
+                            </div>
+
+                            <!-- Synthesized Narrative -->
+                            <div class="narrative-bubble" id="subj-narrative">
+                                Camera is offline. Access is granted exclusively on this dedicated page.
+                            </div>
+
+                        </div>
+
+                        <!-- TAB 2: SCENE TELEMETRY -->
+                        <div class="tab-pane" id="pane-telemetry">
+                            <div class="vision-card" style="padding: 18px;">
+                                <div style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-chart-line" style="color: var(--accent-color);"></i> Environmental &amp; Hardware Diagnostics
+                                </div>
+
+                                <div class="metric-grid-2" style="margin-bottom: 12px;">
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-building"></i> Environment</div>
+                                        <div class="metric-val-large" id="diag-env">INDOOR</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-sun"></i> Lighting</div>
+                                        <div class="metric-val-large highlight" id="diag-light">NORMAL</div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-grid-2" style="margin-bottom: 12px;">
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-gauge"></i> Motion Dynamics</div>
+                                        <div class="metric-val-large" id="diag-activity">STATIC</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-users"></i> People In Frame</div>
+                                        <div class="metric-val-large highlight" id="diag-people">0</div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-grid-2">
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-microchip"></i> System CPU</div>
+                                        <div class="metric-val-large" id="diag-cpu">--%</div>
+                                    </div>
+                                    <div class="metric-card-box">
+                                        <div class="metric-label-row"><i class="fa-solid fa-memory"></i> System RAM</div>
+                                        <div class="metric-val-large" id="diag-ram">--%</div>
+                                    </div>
+                                </div>
+
+                                <div class="metric-card-box" style="margin-top: 10px;">
+                                    <div class="metric-label-row"><i class="fa-solid fa-microchip"></i> Neural Acceleration</div>
+                                    <div class="metric-val-large" id="diag-gpu" style="font-size: 0.88rem;">CPU Mode</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: ENROLLED IDENTITIES -->
+                        <div class="tab-pane" id="pane-profiles">
+                            <div class="vision-card" style="padding: 18px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-id-card" style="color: var(--accent-color); margin-right: 8px;"></i> Recognized Identities</span>
+                                    <button class="primary-btn" style="padding: 6px 14px; font-size: 0.78rem; border-radius: 12px;" onclick="VisionPage.openEnrollModal()">
+                                        <i class="fa-solid fa-plus"></i> Enroll Identity
+                                    </button>
+                                </div>
+                                <div id="profiles-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto;">
+                                    <div style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 14px;">Loading profiles...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 4: VISUAL MEMORY -->
+                        <div class="tab-pane" id="pane-memory">
+                            <div class="vision-card" style="padding: 18px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                                    <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-color); margin-right: 8px;"></i> Visual Memory Log</span>
+                                    <button class="icon-btn" onclick="VisionPage.loadMemory()" title="Refresh Log"><i class="fa-solid fa-rotate"></i></button>
+                                </div>
+                                <div style="max-height: 380px; overflow-y: auto;">
+                                    <table class="vision-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Event</th>
+                                                <th>Subject / Object</th>
+                                                <th>Time</th>
+                                                <th>Conf</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="memory-tbody">
+                                            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading memory records...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- ============================================================
+         IDENTITY ENROLLMENT MODAL (Matches .modal-backdrop & .modal-dialog)
+         ============================================================ -->
+    <div id="enroll-modal" class="modal-backdrop hidden" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fa-solid fa-user-plus" style="color: var(--accent-color);"></i>
+                    <span>Enroll Biometric Identity</span>
+                </div>
+                <button class="icon-btn modal-close-btn" onclick="VisionPage.closeEnrollModal()"><i class="fa-solid fa-times"></i></button>
+            </div>
+            
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; padding: 20px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+                    V.O.I.D. extracts lightweight local embeddings directly on your machine. No raw video is ever uploaded or sent off this computer.
+                </p>
+
+                <div>
+                    <label style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Individual's Name</label>
+                    <input type="text" id="enroll-name-input" class="form-input" placeholder="e.g. Abhinav, Alice, Bob" style="width: 100%; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 14px; outline: none;">
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px; background: rgba(255, 85, 0, 0.05); border: 1px solid rgba(255, 85, 0, 0.2); border-radius: 10px; padding: 10px 14px;">
+                    <input type="checkbox" id="enroll-is-owner" style="accent-color: var(--accent-color); width: 16px; height: 16px; cursor: pointer;">
+                    <label for="enroll-is-owner" style="font-size: 0.85rem; color: var(--text-primary); cursor: pointer; margin: 0;">Register as System Owner</label>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px;">Sample Frame Count</label>
+                    <input type="number" id="enroll-samples-count" value="6" min="3" max="15" style="width: 100%; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 14px; outline: none;">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+                    <button class="primary-btn" style="background: var(--bg-hover); color: var(--text-primary); border: 1px solid var(--border-color); padding: 9px 16px; border-radius: 12px;" onclick="VisionPage.closeEnrollModal()">Cancel</button>
+                    <button class="primary-btn" style="padding: 9px 20px; border-radius: 12px;" onclick="VisionPage.submitEnrollment()"><i class="fa-solid fa-check"></i> Capture &amp; Enroll</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         FRONTEND CONTROLLER LOGIC: Full Integration & High-FPS Handling
+         ============================================================ -->
+    <script>
+        const VisionPage = {
+            isActive: false,
+            currentMode: 'BALANCED',
+            useHud: true,
+            pollTimer: null,
+
+            init() {
+                this.bindNavigation();
+                this.loadDevices();
+                this.loadModels();
+                this.loadProfiles();
+                this.loadMemory();
+                
+                // Automatically activate vision session upon navigating to this dedicated page
+                this.toggleCamera(true);
+                this.startPolling();
+
+                // STRICT CAMERA ISOLATION:
+                // Guarantee immediate hardware release when leaving this webpage
+                window.addEventListener('beforeunload', () => {
+                    navigator.sendBeacon('/api/vision/stop');
+                });
+
+                window.addEventListener('pagehide', () => {
+                    navigator.sendBeacon('/api/vision/stop');
+                });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'hidden') {
+                        // Immediately stop camera feed when switching tabs or minimizing
+                        navigator.sendBeacon('/api/vision/stop');
+                        this.handleCameraDeactivated();
+                    } else if (document.visibilityState === 'visible') {
+                        // Resume camera when returning
+                        this.toggleCamera(true);
+                    }
+                });
+            },
+
+            bindNavigation() {
+                // Mobile Sidebar Controls
+                const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+
+                if (mobileMenuBtn && sidebar && overlay) {
+                    mobileMenuBtn.addEventListener('click', () => {
+                        sidebar.classList.add('open');
+                        overlay.classList.remove('hidden');
+                    });
+                }
+
+                const closeSidebar = () => {
+                    if (sidebar) sidebar.classList.remove('open');
+                    if (overlay) overlay.classList.add('hidden');
+                };
+
+                if (toggleSidebarBtn) toggleSidebarBtn.addEventListener('click', closeSidebar);
+                if (overlay) overlay.addEventListener('click', closeSidebar);
+            },
+
+            async returnToChat() {
+                try {
+                    // Gracefully release camera hardware before navigating
+                    await fetch('/api/vision/stop', { method: 'POST' });
+                } catch(e) {}
+                window.location.href = '/';
+            },
+
+            startPolling() {
+                if (this.pollTimer) clearInterval(this.pollTimer);
+                this.pollTimer = setInterval(() => this.fetchStatus(), 900);
+            },
+
+            async fetchStatus() {
+                try {
+                    const res = await fetch('/api/vision/status?page=vision');
+                    if (!res.ok) return;
+                    const json = await res.json();
+                    const data = json.data || {};
+                    const perception = data.perception || {};
+                    const telemetry = data.telemetry || {};
+                    const cam = telemetry.camera || {};
+                    const hw = telemetry.hardware || {};
+                    const subj = perception.subject || {};
+
+                    this.isActive = !!cam.active;
+                    this.updateUI(perception, cam, hw, subj);
+                } catch (e) {
+                    console.error('Status fetch error:', e);
+                }
+            },
+
+            updateUI(perception, cam, hw, subj) {
+                const streamImg = document.getElementById('video-stream-img');
+                const placeholder = document.getElementById('offline-placeholder');
+                const powerBtnLabel = document.getElementById('power-btn-label');
+                const powerBtn = document.getElementById('camera-power-btn');
+                const statusDot = document.getElementById('status-dot');
+                const statusText = document.getElementById('status-text');
+                const streamPill = document.getElementById('stream-status-pill');
+
+                if (this.isActive) {
+                    placeholder.style.display = 'none';
+                    streamImg.style.display = 'block';
+                    
+                    const expectedSrc = `/api/vision/feed?hud=${this.useHud}&page=vision`;
+                    if (!streamImg.src.includes('/api/vision/feed')) {
+                        streamImg.src = expectedSrc + `&t=${Date.now()}`;
+                    }
+
+                    powerBtn.style.background = '#dc2626';
+                    powerBtnLabel.textContent = 'Deactivate Optical Feed';
+
+                    statusDot.style.background = '#00ff9d';
+                    statusDot.style.boxShadow = '0 0 8px #00ff9d';
+                    statusText.textContent = 'V.O.I.D. Vision Active // Exclusive Feed';
+
+                    streamPill.className = 'telemetry-pill live';
+                } else {
+                    placeholder.style.display = 'flex';
+                    streamImg.style.display = 'none';
+                    streamImg.src = '';
+
+                    powerBtn.style.background = 'var(--accent-color)';
+                    powerBtnLabel.textContent = 'Activate Optical Feed';
+
+                    statusDot.style.background = '#64748b';
+                    statusDot.style.boxShadow = 'none';
+                    statusText.textContent = 'V.O.I.D. Vision Standby';
+
+                    streamPill.className = 'telemetry-pill';
+                }
+
+                // Stream stats overlay
+                const fpsText = cam.actual_fps ? cam.actual_fps.toFixed(1) : '0.0';
+                const detFps = (cam.detection_fps !== undefined && cam.detection_fps !== null) ? cam.detection_fps : (data.telemetry && data.telemetry.detection_fps);
+                const detFpsText = (detFps && detFps > 0) ? detFps.toFixed(1) : null;
+                document.getElementById('overlay-tag-fps').textContent = detFpsText ? `${fpsText} FPS // DET: ${detFpsText} FPS` : `${fpsText} FPS`;
+                document.getElementById('diag-mode-pill').textContent = `${cam.mode || 'BALANCED'} // ${cam.target_fps || 30} FPS`;
+
+                if (hw) {
+                    document.getElementById('diag-cpu').textContent = hw.cpu_percent ? `${hw.cpu_percent}%` : '--%';
+                    document.getElementById('diag-ram').textContent = hw.ram_percent ? `${hw.ram_percent}%` : '--%';
+                    if (hw.gpu_name) document.getElementById('diag-gpu').textContent = hw.gpu_name;
+                }
+
+                // Scene telemetry
+                const scene = perception.scene || {};
+                document.getElementById('diag-env').textContent = (scene.environment || 'INDOOR').toUpperCase();
+                document.getElementById('diag-light').textContent = (scene.lighting || 'NORMAL').toUpperCase();
+                document.getElementById('diag-activity').textContent = (cam.last_motion_score > 0.05 ? 'ACTIVE' : 'STATIC');
+                document.getElementById('diag-people').textContent = (perception.faces || []).length || (subj.detected ? 1 : 0);
+
+                // ==========================================
+                // REAL-TIME SUBJECT DOSSIER BINDINGS
+                // ==========================================
+                this.updateSubjectDossier(subj, perception);
+            },
+
+            updateSubjectDossier(subj, perception) {
+                const avatar = document.getElementById('subject-avatar');
+                const nameEl = document.getElementById('subj-name');
+                const roleEl = document.getElementById('subj-role');
+                const statusDesc = document.getElementById('subj-status-desc');
+                const confEl = document.getElementById('subj-conf');
+                const narrativeEl = document.getElementById('subj-narrative');
+
+                if (this.isActive && subj && subj.detected) {
+                    const ident = subj.identity || {};
+                    const spatial = subj.spatial || {};
+                    const cog = subj.cognitive_and_pose || {};
+                    const attire = subj.attire || {};
+                    const act = subj.activity || {};
+
+                    // Identity Banner
+                    nameEl.textContent = ident.name || 'Unidentified Subject';
+                    roleEl.textContent = ident.role || 'SUBJECT';
+                    roleEl.className = `subject-role-badge ${ident.role_badge || 'guest'}`;
+                    avatar.className = `subject-avatar-ring ${ident.role_badge || 'guest'}`;
+                    confEl.textContent = `${ident.confidence_pct || 85}%`;
+                    statusDesc.textContent = `Primary subject detected in foreground with ${spatial.distance_label || 'optimal range'}.`;
+
+                    // Spatial Geometry
+                    document.getElementById('subj-dist').textContent = spatial.distance_label || '-- m';
+                    document.getElementById('subj-offset').textContent = spatial.alignment || 'Centered';
+                    document.getElementById('subj-coverage').textContent = `${spatial.coverage_pct || 0}%`;
+                    document.getElementById('subj-pose').textContent = cog.head_pose || 'Frontal (0°)';
+                    const bb = spatial.bounding_box || {};
+                    document.getElementById('subj-coords').textContent = `X:${bb.x || 0}, Y:${bb.y || 0} (${bb.width || 0}x${bb.height || 0})`;
+                    document.getElementById('subj-dwell-tag').textContent = `DWELL: ${act.dwell_formatted || '00:00'}`;
+
+                    // Cognitive & Mood
+                    document.getElementById('subj-mood').textContent = cog.mood || 'Attentive';
+                    document.getElementById('subj-gaze').textContent = cog.gaze || 'Direct';
+                    document.getElementById('subj-exposure').textContent = cog.exposure || 'Optimal';
+
+                    // Attire Color Swatch
+                    const swatch = document.getElementById('color-swatch');
+                    const colorName = document.getElementById('color-name');
+                    const colorHex = document.getElementById('color-hex');
+                    if (attire.hex) {
+                        swatch.style.backgroundColor = attire.hex;
+                        swatch.style.boxShadow = `0 0 14px ${attire.hex}88`;
+                        colorName.textContent = attire.name || 'Clothing Color';
+                        colorHex.textContent = attire.hex;
+                    }
+
+                    // Activity & Gestures
+                    document.getElementById('subj-motion').textContent = act.motion || 'Stationary';
+                    const gestures = act.gestures || [];
+                    document.getElementById('subj-gesture-text').textContent = gestures[0] || 'None Detected';
+
+                    // Vicinity items
+                    const items = subj.vicinity_objects || [];
+                    document.getElementById('items-count-badge').textContent = `${items.length} ITEMS`;
+                    const tagsGrid = document.getElementById('subj-items-tags');
+                    if (items.length > 0) {
+                        tagsGrid.innerHTML = items.map(it => `
+                            <span class="item-tag">
+                                <i class="fa-solid fa-cube"></i> ${it.label} (${it.confidence}%)
+                            </span>
+                        `).join('') + gestures.map(g => `
+                            <span class="item-tag gesture">
+                                <i class="fa-solid fa-hand"></i> ${g}
+                            </span>
+                        `).join('');
+                    } else if (gestures.length > 0 && gestures[0] !== 'None (Hands Resting)') {
+                        tagsGrid.innerHTML = gestures.map(g => `
+                            <span class="item-tag gesture">
+                                <i class="fa-solid fa-hand"></i> ${g}
+                            </span>
+                        `).join('');
+                    } else {
+                        tagsGrid.innerHTML = '<span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">No items or gestures detected in close vicinity.</span>';
+                    }
+
+                    // Liveness Badge & Telemetry
+                    const livenessBadge = document.getElementById('subj-liveness-badge');
+                    const livenessVal = document.getElementById('subj-liveness-val');
+                    const liveInfo = ident.liveness || {};
+                    const liveStatus = (liveInfo.status || 'VERIFYING').toUpperCase();
+                    if (livenessBadge) {
+                        livenessBadge.style.display = 'inline-block';
+                        if (liveStatus === 'REAL') {
+                            livenessBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+                            livenessBadge.style.color = '#10b981';
+                            livenessBadge.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                            livenessBadge.textContent = '3D LIVE ✓';
+                        } else if (liveStatus === 'SPOOF') {
+                            livenessBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+                            livenessBadge.style.color = '#ef4444';
+                            livenessBadge.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+                            livenessBadge.textContent = 'SPOOF DETECTED ⚠';
+                        } else {
+                            livenessBadge.style.background = 'rgba(245, 158, 11, 0.15)';
+                            livenessBadge.style.color = '#f59e0b';
+                            livenessBadge.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+                            livenessBadge.textContent = 'VERIFYING 3D...';
+                        }
+                    }
+                    if (livenessVal) {
+                        livenessVal.textContent = `${liveStatus} (${Math.round((liveInfo.score || 0.85) * 100)}%)`;
+                    }
+
+                    // Attention & Fatigue
+                    if (document.getElementById('subj-attention')) {
+                        document.getElementById('subj-attention').textContent = `${cog.attention_score ?? 85}%`;
+                    }
+                    if (document.getElementById('subj-fatigue')) {
+                        const fat = cog.fatigue_status || 'ALERT';
+                        document.getElementById('subj-fatigue').textContent = fat.includes('FATIGUED') ? 'Fatigued ⚠' : 'Alert & Attentive';
+                        document.getElementById('subj-fatigue').style.color = fat.includes('FATIGUED') ? '#f59e0b' : '#10b981';
+                    }
+
+                    // Natural Synthesis
+                    narrativeEl.textContent = subj.natural_summary || 'Tracking primary subject in optical view.';
+                } else {
+                    // Standby / No Subject in View
+                    nameEl.textContent = this.isActive ? 'No Subject in View' : 'Sensors Suspended';
+                    roleEl.textContent = 'STANDBY';
+                    roleEl.className = 'subject-role-badge guest';
+                    avatar.className = 'subject-avatar-ring';
+                    confEl.textContent = '--%';
+                    statusDesc.textContent = this.isActive ? 'Awaiting subject entrance in camera field.' : 'Camera hardware decoupled and offline.';
+                    document.getElementById('subj-dist').textContent = '-- m';
+                    document.getElementById('subj-offset').textContent = '--';
+                    document.getElementById('subj-coverage').textContent = '--%';
+                    document.getElementById('subj-dwell-tag').textContent = 'DWELL: 00:00';
+                    if (document.getElementById('subj-liveness-badge')) {
+                        document.getElementById('subj-liveness-badge').style.display = 'none';
+                    }
+                    if (document.getElementById('subj-liveness-val')) {
+                        document.getElementById('subj-liveness-val').textContent = '--';
+                    }
+                    if (document.getElementById('subj-attention')) {
+                        document.getElementById('subj-attention').textContent = '--%';
+                    }
+                    if (document.getElementById('subj-fatigue')) {
+                        document.getElementById('subj-fatigue').textContent = 'Standby';
+                        document.getElementById('subj-fatigue').style.color = 'var(--text-primary)';
+                    }
+                    narrativeEl.textContent = this.isActive ? 'Camera online. Please look into the camera to display live subject dossier.' : 'Camera is offline. Access is granted exclusively to this page.';
+                }
+            },
+
+            handleCameraDeactivated() {
+                this.isActive = false;
+                const streamImg = document.getElementById('video-stream-img');
+                if (streamImg) streamImg.src = '';
+                this.fetchStatus();
+            },
+
+            async toggleCamera(forceStart = null) {
+                const streamImg = document.getElementById('video-stream-img');
+                const isStart = forceStart !== null ? forceStart : !this.isActive;
+
+                try {
+                    const url = isStart ? '/api/vision/start?page=vision' : '/api/vision/stop';
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ page: 'vision' })
+                    });
+                    const data = await res.json();
+                    if (!isStart) {
+                        streamImg.src = '';
+                    }
+                    await this.fetchStatus();
+                } catch (e) {
+                    console.error('Toggle camera error:', e);
+                }
+            },
+
+            async setMode(mode) {
+                this.currentMode = mode;
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.mode === mode);
+                });
+                try {
+                    await fetch('/api/vision/mode', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ mode })
+                    });
+                    this.fetchStatus();
+                } catch (e) { console.error(e); }
+            },
+
+            toggleHud(enabled) {
+                this.useHud = enabled;
+                if (this.isActive) {
+                    const streamImg = document.getElementById('video-stream-img');
+                    streamImg.src = `/api/vision/feed?hud=${this.useHud}&page=vision&t=${Date.now()}`;
+                }
+            },
+
+            async loadDevices() {
+                try {
+                    const res = await fetch('/api/vision/devices');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const select = document.getElementById('camera-select');
+                    if (data.devices && data.devices.length > 0) {
+                        select.innerHTML = data.devices.map(d => `
+                            <option value="${d.index}">Device ${d.index}: ${d.name || 'Webcam'}</option>
+                        `).join('');
+                    }
+                } catch (e) { console.error('Device listing error:', e); }
+            },
+
+            async switchCamera(index) {
+                try {
+                    await fetch('/api/vision/start?page=vision', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ device_index: parseInt(index), page: 'vision' })
+                    });
+                    this.fetchStatus();
+                } catch (e) { console.error(e); }
+            },
+
+            async loadModels() {
+                try {
+                    const res = await fetch('/api/vision/models');
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const select = document.getElementById('model-select');
+                    if (select && data.available_object_models && data.available_object_models.length > 0) {
+                        select.innerHTML = data.available_object_models.map(m => `
+                            <option value="${m.filename}" ${m.active ? 'selected' : ''}>${m.label} (${m.size_mb} MB)</option>
+                        `).join('');
+                    }
+
+                    // Toggle open-vocabulary panel
+                    const isWorld = data.is_open_vocabulary || (data.active_model && data.active_model.includes('world'));
+                    const vocabPanel = document.getElementById('vocab-controls-container');
+                    if (vocabPanel) {
+                        vocabPanel.style.display = isWorld ? 'block' : 'none';
+                    }
+                    const badge = document.getElementById('vocab-count-badge');
+                    if (badge && data.active_vocabulary) {
+                        badge.textContent = `${data.active_vocabulary.length} Classes (2M+ Open Vocab)`;
+                    }
+                } catch (e) { console.error('Model listing error:', e); }
+            },
+
+            async switchModel(modelName) {
+                try {
+                    const statusEl = document.getElementById('vocab-status-indicator');
+                    if (statusEl) statusEl.textContent = 'Switching neural architecture...';
+                    const res = await fetch('/api/vision/models/switch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ model_name: modelName })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        console.log('Neural model switched to:', modelName);
+                        const isWorld = data.is_open_vocabulary || modelName.includes('world');
+                        const vocabPanel = document.getElementById('vocab-controls-container');
+                        if (vocabPanel) {
+                            vocabPanel.style.display = isWorld ? 'block' : 'none';
+                        }
+                        if (statusEl) {
+                            statusEl.textContent = isWorld ? '✓ Open-Vocabulary YOLO-World 2M+ active' : '✓ Standard COCO-80 YOLO active';
+                            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+                        }
+                        const badge = document.getElementById('vocab-count-badge');
+                        if (badge && data.active_vocabulary) {
+                            badge.textContent = `${data.active_vocabulary.length} Classes (2M+ Open Vocab)`;
+                        }
+                    }
+                } catch (e) { console.error('Model switch error:', e); }
+            },
+
+            async applyVocabPreset(presetName, btnEl) {
+                try {
+                    const chips = document.querySelectorAll('.vocab-preset-chip');
+                    chips.forEach(c => c.classList.remove('active'));
+                    if (btnEl) btnEl.classList.add('active');
+
+                    const statusEl = document.getElementById('vocab-status-indicator');
+                    if (statusEl) statusEl.textContent = `Applying '${presetName}' preset...`;
+
+                    const res = await fetch('/api/vision/models/vocabulary', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ preset: presetName })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        const badge = document.getElementById('vocab-count-badge');
+                        if (badge) badge.textContent = `${data.count} Classes Active`;
+                        if (statusEl) {
+                            statusEl.textContent = `✓ '${presetName}' active (${data.count} categories)`;
+                            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 2500);
+                        }
+                    }
+                } catch (e) { console.error('Vocab preset error:', e); }
+            },
+
+            async addCustomVocab() {
+                const input = document.getElementById('custom-vocab-input');
+                if (!input || !input.value.trim()) return;
+                const newTargets = input.value.trim();
+                input.value = '';
+
+                const statusEl = document.getElementById('vocab-status-indicator');
+                if (statusEl) statusEl.textContent = `Encoding '${newTargets}' into vision space...`;
+
+                try {
+                    // Fetch existing vocabulary, append new classes
+                    const curRes = await fetch('/api/vision/models/vocabulary');
+                    const curData = await curRes.json();
+                    let currentClasses = curData.active_vocabulary || [];
+
+                    const addedList = newTargets.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+                    for (const item of addedList) {
+                        if (!currentClasses.includes(item)) {
+                            currentClasses.unshift(item);
+                        }
+                    }
+
+                    const res = await fetch('/api/vision/models/vocabulary', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ classes: currentClasses })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        const badge = document.getElementById('vocab-count-badge');
+                        if (badge) badge.textContent = `${data.count} Classes Active`;
+                        if (statusEl) {
+                            statusEl.textContent = `✓ Added [${addedList.join(', ')}] to live detector!`;
+                            setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Custom vocab error:', e);
+                    if (statusEl) statusEl.textContent = 'Failed to add custom target';
+                }
+            },
+
+            async takeSnapshot() {
+                // Visual shutter flash effect
+                const flash = document.getElementById('shutter-flash');
+                flash.classList.add('active');
+                setTimeout(() => flash.classList.remove('active'), 80);
+
+                try {
+                    const res = await fetch('/api/vision/snapshot', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        const subj = data.subject || {};
+                        const ident = subj.identity || {};
+                        const name = ident.name || 'Subject';
+                        const dist = subj.spatial?.distance_label || 'optimal range';
+                        alert(`📸 Snapshot Captured & Dossier Extracted:\n- Subject: ${name} (${ident.role || 'Detected'})\n- Range: ${dist}\n- Attire: ${subj.attire?.name || 'Standard'}\n- Mood: ${subj.cognitive_and_pose?.mood || 'Neutral'}`);
+                        this.loadMemory();
+                    }
+                } catch (e) { alert('Snapshot failed: ' + e); }
+            },
+
+            async scanScene() {
+                const box = document.getElementById('qa-response-box');
+                const textEl = document.getElementById('qa-response-text');
+                box.className = 'reasoning-response-box';
+                textEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Deep visual reasoning in progress...';
+                try {
+                    const res = await fetch('/api/vision/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: 'Perform deep scan of the subject and immediate environment.' })
+                    });
+                    const data = await res.json();
+                    textEl.textContent = data.result?.natural_response || 'Scan analysis complete.';
+                } catch (e) {
+                    textEl.textContent = 'Scan analysis error: ' + e;
+                }
+            },
+
+            async askQuestion() {
+                const input = document.getElementById('qa-query-input');
+                const query = input.value.trim();
+                if (!query) return;
+                this.quickAsk(query);
+            },
+
+            async quickAsk(query) {
+                const box = document.getElementById('qa-response-box');
+                const textEl = document.getElementById('qa-response-text');
+                box.className = 'reasoning-response-box';
+                textEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Visual reasoning in progress...';
+                document.getElementById('qa-query-input').value = query;
+
+                try {
+                    const res = await fetch('/api/vision/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query })
+                    });
+                    const data = await res.json();
+                    textEl.textContent = data.result?.natural_response || 'Visual analysis complete.';
+                } catch (e) {
+                    textEl.textContent = '❌ Error analyzing visual query: ' + e;
+                }
+            },
+
+            switchTab(tabName) {
+                document.querySelectorAll('.intel-tab[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === `pane-${tabName}`));
+                if (tabName === 'profiles') this.loadProfiles();
+                if (tabName === 'memory') this.loadMemory();
+            },
+
+            async loadProfiles() {
+                try {
+                    const res = await fetch('/api/vision/profiles');
+                    const data = await res.json();
+                    const list = document.getElementById('profiles-list');
+                    const profiles = data.profiles || [];
+                    if (profiles.length === 0) {
+                        list.innerHTML = '<div style="color: var(--text-muted); font-size: 0.82rem; text-align: center; padding: 14px;">No enrolled profiles yet.</div>';
+                    } else {
+                        list.innerHTML = profiles.map(p => `
+                            <div class="profile-row-item">
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <span style="font-weight: 600; color: var(--text-primary); font-size: 0.88rem;">${p.name}</span>
+                                    ${p.is_owner ? '<span class="subject-role-badge owner">OWNER</span>' : '<span class="subject-role-badge known">KNOWN</span>'}
+                                    ${!p.is_neural ? '<span style="font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);" title="Enrolled with legacy descriptor. Re-enroll for neural precision.">LEGACY (RE-ENROLL)</span>' : '<span style="font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; background: rgba(52, 211, 153, 0.15); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.3);">SFACE NEURAL</span>'}
+                                </div>
+                                <button class="icon-btn" title="Delete Profile" onclick="VisionPage.deleteProfile('${p.id}')" style="color: #ef4444;">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        `).join('');
+                    }
+                } catch (e) { console.error('Profiles load error:', e); }
+            },
+
+            async deleteProfile(id) {
+                if (!confirm(`Are you sure you want to remove identity profile ${id}?`)) return;
+                try {
+                    await fetch(`/api/vision/profiles/${id}`, { method: 'DELETE' });
+                    this.loadProfiles();
+                } catch (e) { alert('Delete failed: ' + e); }
+            },
+
+            openEnrollModal() {
+                const modal = document.getElementById('enroll-modal');
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+                document.getElementById('enroll-name-input').focus();
+            },
+
+            closeEnrollModal() {
+                const modal = document.getElementById('enroll-modal');
+                modal.classList.add('hidden');
+                modal.style.display = 'none';
+            },
+
+            async submitEnrollment() {
+                const name = document.getElementById('enroll-name-input').value.trim();
+                if (!name) {
+                    alert('Please enter a name for the identity profile.');
+                    return;
+                }
+                const isOwner = document.getElementById('enroll-is-owner').checked;
+                const samples = parseInt(document.getElementById('enroll-samples-count').value) || 6;
+
+                this.closeEnrollModal();
+                alert(`Starting local face embedding capture for "${name}". Please look at the camera...`);
+
+                try {
+                    const res = await fetch('/api/vision/enroll', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, is_owner: isOwner, samples })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        alert(`✅ Success: ${data.result?.message || 'Profile created'}`);
+                        this.loadProfiles();
+                        this.fetchStatus();
+                    } else {
+                        alert(`⚠️ Enrollment Failed: ${data.result?.error || 'No face detected'}`);
+                    }
+                } catch (e) { alert('Enrollment error: ' + e); }
+            },
+
+            async loadMemory() {
+                try {
+                    const res = await fetch('/api/vision/memory?limit=25');
+                    const data = await res.json();
+                    const tbody = document.getElementById('memory-tbody');
+                    const obs = data.observations || [];
+                    if (obs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No visual memory records found.</td></tr>';
+                    } else {
+                        tbody.innerHTML = obs.map(o => `
+                            <tr>
+                                <td style="font-family: var(--font-code); font-size: 0.76rem; color: var(--accent-color);">${o.event_type || 'OBSERVATION'}</td>
+                                <td>${o.object || o.person || '--'}</td>
+                                <td style="color: var(--text-muted); font-size: 0.76rem;">${o.timestamp ? o.timestamp.substring(11, 19) : '--'}</td>
+                                <td style="font-family: var(--font-code); color: #34d399;">${((o.confidence || 1.0) * 100).toFixed(0)}%</td>
+                            </tr>
+                        `).join('');
+                    }
+                } catch (e) { console.error('Memory load error:', e); }
+            },
+
+            async clearMemory() {
+                if (!confirm("Are you sure you want to wipe all stored visual memories?")) return;
+                try {
+                    await fetch('/api/vision/memory', { method: 'DELETE' });
+                    this.loadMemory();
+                } catch(e) { console.error(e); }
+            },
+
+            toggleTheme() {
+                const currentTheme = document.body.getAttribute('data-theme') || 'dark';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', newTheme);
+                document.body.className = `theme-${newTheme}`;
+                const icon = document.getElementById('theme-icon');
+                if (icon) {
+                    icon.className = newTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+                }
+                localStorage.setItem('void_theme', newTheme);
+            },
+
+            toggleFullscreen() {
+                const container = document.getElementById('viewport-frame-container');
+                if (!document.fullscreenElement) {
+                    if (container.requestFullscreen) container.requestFullscreen();
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Restore saved theme if any
+            const savedTheme = localStorage.getItem('void_theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.body.className = `theme-${savedTheme}`;
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = savedTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+
+            VisionPage.init();
+        });
+    </script>
+</body>
+</html>

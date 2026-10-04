@@ -1,0 +1,73 @@
+{
+  "connection": {
+    "preferred_serial": null,
+    "tcp_host": "192.168.1.100",
+    "tcp_port": 5555,
+    "auto_connect_tcp": false,
+    "timeout_seconds": 10.0
+  },
+  "unlock": {
+    "default_pin": "1234",
+    "swipe_start_y_percent": 0.85,
+    "swipe_end_y_percent": 0.20,
+    "swipe_duration_ms": 300,
+    "wake_delay_seconds": 0.5
+  },
+  "apps": {
+    "jiocinema": "com.jio.media.ondemand",
+    "jio cinema": "com.jio.media.ondemand",
+    "jio": "com.jio.media.ondemand",
+    "youtube": "com.google.android.youtube",
+    "yt": "com.google.android.youtube",
+    "whatsapp": "com.whatsapp",
+    "whats app": "com.whatsapp",
+    "instagram": "com.instagram.android",
+    "insta": "com.instagram.android",
+    "spotify": "com.spotify.music",
+    "netflix": "com.netflix.mediaclient",
+    "chrome": "com.android.chrome",
+    "browser": "com.android.chrome",
+    "camera": "com.android.camera2",
+    "settings": "com.android.settings",
+    "maps": "com.google.android.apps.maps",
+    "google maps": "com.google.android.apps.maps",
+    "telegram": "org.telegram.messenger",
+    "gmail": "com.google.android.gm",
+    "mail": "com.google.android.gm",
+    "gallery": "com.google.android.apps.photos",
+    "photos": "com.google.android.apps.photos",
+    "calculator": "com.google.android.calculator",
+    "calc": "com.google.android.calculator",
+    "clock": "com.google.android.deskclock",
+    "alarm": "com.google.android.deskclock",
+    "messages": "com.google.android.apps.messaging",
+    "sms": "com.google.android.apps.messaging",
+    "phone": "com.google.android.dialer",
+    "dialer": "com.google.android.dialer",
+    "twitter": "com.twitter.android",
+    "x": "com.twitter.android",
+    "uber": "com.ubercab",
+    "swiggy": "in.swiggy.android",
+    "zomato": "com.application.zomato",
+    "hotstar": "in.startv.hotstar",
+    "disney hotstar": "in.startv.hotstar",
+    "amazon": "in.amazon.mShop.android.shopping",
+    "flipkart": "com.flipkart.android",
+    "playstore": "com.android.vending",
+    "play store": "com.android.vending"
+  },
+  "contacts": {
+    "mom": "+1234567890",
+    "dad": "+1234567891",
+    "home": "+1234567892",
+    "work": "+1234567893",
+    "emergency": "112"
+  },
+  "voice": {
+    "wake_word": "void",
+    "alternative_wake_words": ["hey void", "ok void", "hello void"],
+    "listen_timeout": 7,
+    "phrase_limit": 10,
+    "speak_feedback": true
+  }
+}

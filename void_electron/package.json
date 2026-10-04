@@ -1,0 +1,15 @@
+{
+  "name": "void-desktop",
+  "version": "1.0.0",
+  "description": "V.O.I.D. Advanced Neural Interface - Standalone Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": ["ai", "neural", "desktop", "offline"],
+  "author": "V.O.I.D. Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.0.0"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "examples": [
+    {
+      "input": "summarize this text Why can’t you be like the Happy Prince",
+      "output": "Summary: summarize this text Why can’t you be like the Happy Prince"
+    },
+    {
+      "input": "summarize this text Why can’t you be like the Happy Prince",
+      "output": "Summary: summarize this text Why can’t you be like the Happy Prince"
+    },
+    {
+      "input": "summarize this: Why can't you be like the Happy Prince? He was always generous and kind, helping the poor and giving away everything he had.",
+      "output": "Summary: summarize this: Why can't you be like the Happy Prince"
+    },
+    {
+      "input": "summarize this: Why can't you be like the Happy Prince? He was always generous and kind, helping the poor and giving away everything he had.",
+      "output": "Summary: summarize this: Why can't you be like the Happy Prince"
+    }
+  ]
+}

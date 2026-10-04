@@ -1,0 +1,73 @@
+{
+  "hardware_profile": {
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "vram_total_mb": 4096.0,
+    "vram_safe_limit_mb": 2867.0,
+    "cpu": "AMD Ryzen 5 5600H (6 Cores, 12 Threads)",
+    "ram_total_gb": 16.0,
+    "os": "Windows 11"
+  },
+  "domain_confidence": {
+    "python_development": 0.96,
+    "mathematics_and_calculus": 0.92,
+    "system_diagnostics": 0.96,
+    "desktop_automation": 0.88,
+    "phone_control_adb": 0.89,
+    "offline_voice_piper_whisper": 0.86,
+    "computer_vision": 0.78,
+    "web_research_synthesis": 0.82,
+    "robotics_and_sensors": 0.45,
+    "cloud_infrastructure": 0.7
+  },
+  "known_weaknesses": {
+    "computer_vision": [
+      "low_light_environments",
+      "occluded_faces",
+      "extreme_camera_angles"
+    ],
+    "web_research": [
+      "paywalled_sources",
+      "javascript_heavy_spas",
+      "offline_environments"
+    ],
+    "coding": [
+      "kernel_level_drivers",
+      "legacy_fortran_cobol"
+    ],
+    "hardware": [
+      "concurrent_model_loading_oom",
+      "long_context_4gb_vram_limit"
+    ]
+  },
+  "skill_history": {
+    "coding": {
+      "success": 0,
+      "fail": 0
+    },
+    "math": {
+      "success": 0,
+      "fail": 0
+    },
+    "system": {
+      "success": 0,
+      "fail": 0
+    },
+    "vision": {
+      "success": 0,
+      "fail": 0
+    },
+    "research": {
+      "success": 0,
+      "fail": 0
+    },
+    "python_development": {
+      "success": 2,
+      "fail": 0
+    },
+    "multi_agent": {
+      "success": 34,
+      "fail": 0
+    }
+  },
+  "updated_at": 1790788913.1119125
+}

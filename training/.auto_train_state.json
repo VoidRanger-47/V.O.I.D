@@ -1,0 +1,118 @@
+{
+  "last_updated": "2026-09-30T22:48:07.400216",
+  "history": [
+    {
+      "session_id": "F4E4FDE7",
+      "state": "ABORTED",
+      "triggered_by": "void_autonomous",
+      "trigger_reason": "Admin-triggered autonomous self-improvement cycle",
+      "candidates": [
+        {
+          "name": "cybersecurity_trendyol",
+          "url": "https://huggingface.co/datasets/ChavyvAkvar/Trendyol-Cybersecurity-Instruction-Tuning-Dataset-Converted/resolve/main/data/train-00000-of-00001.parquet",
+          "description": "53,200 multi-turn cybersecurity instruction and defense dialogs",
+          "domain": "cybersecurity",
+          "format": "parquet_messages",
+          "estimated_mb": 65.0,
+          "quality_score": 0.94,
+          "source_tier": 1,
+          "reason": "Authoritative cybersecurity multi-turn instruction dataset covering MITRE ATT&CK, threat analysis, and defenses.",
+          "selected": true
+        },
+        {
+          "name": "code_alpaca_20k",
+          "url": "https://raw.githubusercontent.com/sahil280114/codealpaca/master/data/code_alpaca_20k.json",
+          "description": "20,000 clean algorithmic and practical code instructions",
+          "domain": "coding",
+          "format": "alpaca_json",
+          "estimated_mb": 15.0,
+          "quality_score": 0.92,
+          "source_tier": 1,
+          "reason": "Gold-standard small code corpus; high instruction-following signal across Python, JS, Bash.",
+          "selected": true
+        },
+        {
+          "name": "ultrachat_200k_shard0",
+          "url": "https://huggingface.co/datasets/HuggingFaceH4/ultrachat_200k/resolve/main/data/train_sft-00000-of-00003-a3ecf92756993583.parquet",
+          "description": "69,000 rich multi-turn conversational fluency, reasoning, and instruction sessions",
+          "domain": "language",
+          "format": "parquet_messages",
+          "estimated_mb": 120.0,
+          "quality_score": 0.95,
+          "source_tier": 1,
+          "reason": "Highest quality multi-turn dialogue corpus; critical for natural language fluency and reasoning.",
+          "selected": true
+        },
+        {
+          "name": "cybersecurity_alpaca",
+          "url": "https://huggingface.co/datasets/ahmedds10/alpaca_Cybersecurity_json/resolve/main/alpaca_Cybersecurity.json",
+          "description": "Alpaca-format cybersecurity prompts covering exploits, defense, CVE analysis",
+          "domain": "cybersecurity",
+          "format": "alpaca_json",
+          "estimated_mb": 18.0,
+          "quality_score": 0.88,
+          "source_tier": 2,
+          "reason": "Diverse pen-testing and vulnerability analysis prompts; complements Trendyol with CVE-specific examples.",
+          "selected": true
+        },
+        {
+          "name": "code_instructions_122k",
+          "url": "https://huggingface.co/datasets/TokenBender/code_instructions_122k_alpaca_style/resolve/main/code_instructions_120k.json",
+          "description": "120,000 multi-language software engineering and systems coding pairs",
+          "domain": "coding",
+          "format": "alpaca_json",
+          "estimated_mb": 95.0,
+          "quality_score": 0.89,
+          "source_tier": 1,
+          "reason": "Large-scale multi-language coding corpus; significantly boosts algorithm and systems fluency.",
+          "selected": true
+        },
+        {
+          "name": "dolly_15k",
+          "url": "https://huggingface.co/datasets/databricks/databricks-dolly-15k/resolve/main/databricks-dolly-15k.jsonl",
+          "description": "15,000 human-written instruction-following samples by Databricks employees",
+          "domain": "language",
+          "format": "jsonl",
+          "estimated_mb": 13.0,
+          "quality_score": 0.93,
+          "source_tier": 1,
+          "reason": "Human-authored instruction quality; prevents model from over-relying on synthetic patterns.",
+          "selected": true
+        },
+        {
+          "name": "python_code_18k",
+          "url": "https://huggingface.co/datasets/iamtarun/python_code_instructions_18k_alpaca/resolve/main/data/train-00000-of-00001-4edd896bba6861e9.parquet",
+          "description": "18,000 Python-specific instruction-code pairs from curated GitHub examples",
+          "domain": "coding",
+          "format": "parquet_messages",
+          "estimated_mb": 22.0,
+          "quality_score": 0.91,
+          "source_tier": 1,
+          "reason": "Pure Python focus; improves scripting, automation, and data structures competency.",
+          "selected": false
+        }
+      ],
+      "authorized_by": null,
+      "auth_timestamp": null,
+      "download_progress": {},
+      "training_step": 0,
+      "training_loss": 0.0,
+      "log_lines": [
+        "[22:47:52] Scanning curated dataset catalog...",
+        "[22:47:53]   OK [CYBERSECURITY] cybersecurity_trendyol (reachable)",
+        "[22:47:54]   OK [CYBERSECURITY] cybersecurity_alpaca (reachable)",
+        "[22:47:56]   OK [CODING] code_alpaca_20k (reachable)",
+        "[22:47:57]   OK [CODING] code_instructions_122k (reachable)",
+        "[22:47:57]   SKIP [CODING] python_code_18k (unreachable)",
+        "[22:47:58]   OK [LANGUAGE] ultrachat_200k_shard0 (reachable)",
+        "[22:47:59]   OK [LANGUAGE] dolly_15k (reachable)",
+        "[22:47:59] Scouting complete. 6 datasets selected (326 MB estimated)",
+        "[22:47:59] PAUSING - Awaiting admin authorization before any downloads begin.",
+        "[22:48:07] ABORTED by admin."
+      ],
+      "started_at": "2026-09-30T22:47:52.400002",
+      "completed_at": null,
+      "error": null
+    }
+  ]
+}

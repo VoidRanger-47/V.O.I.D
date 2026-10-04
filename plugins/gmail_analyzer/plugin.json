@@ -1,0 +1,29 @@
+{
+  "id": "gmail_analyzer",
+  "name": "Gmail Analyzer & Inbox Intelligence",
+  "version": "1.0.0",
+  "description": "Analyzes your Gmail inbox, summarizes recent threads, classifies urgent action items, financial invoices, system alerts, and enables natural language email queries.",
+  "author": "V.O.I.D. Core Team",
+  "entrypoint": "plugin.py",
+  "class_name": "GmailAnalyzerPlugin",
+  "enabled": true,
+  "triggers": [
+    "gmail",
+    "email",
+    "emails",
+    "inbox",
+    "unread emails",
+    "check mail",
+    "analyze my email",
+    "analyze my gmail",
+    "summarize email",
+    "search email",
+    "search emails",
+    "mail status"
+  ],
+  "permissions": [
+    "LEVEL_6_NETWORK",
+    "LEVEL_1_READ_INFO"
+  ],
+  "config_file": "config.json"
+}

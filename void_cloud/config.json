@@ -1,0 +1,10 @@
+{
+  "cloud_mode_enabled": true,
+  "active_provider": "gemini",
+  "api_key": "",
+  "model_name": "test-model-123",
+  "temperature": 0.7,
+  "max_tokens": 2048,
+  "top_p": 0.95,
+  "auto_fallback_to_local": true
+}

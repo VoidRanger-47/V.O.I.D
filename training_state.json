@@ -1,0 +1,7 @@
+{
+  "status": "testing",
+  "step": 42,
+  "max_steps": 100,
+  "loss": 1.2345,
+  "preset": "quick"
+}

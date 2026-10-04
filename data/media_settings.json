@@ -1,0 +1,8 @@
+{
+  "retention_days": 7,
+  "auto_purge_enabled": true,
+  "last_purge_timestamp": 1790920251.1994169,
+  "default_width": 512,
+  "default_height": 512,
+  "max_gallery_items": 500
+}
