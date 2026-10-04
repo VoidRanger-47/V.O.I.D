@@ -96,6 +96,7 @@ class ChatInterface {
             // Attachment Plus Button & Neural Action Menu
             attachmentPlusBtn: document.getElementById('attachment-plus-btn'),
             attachmentMenu: document.getElementById('attachment-action-menu'),
+            attachmentMenuBackdrop: document.getElementById('attachment-menu-backdrop'),
             attachmentCloseBtn: document.getElementById('void-menu-close-btn'),
             visionUploadInput: document.getElementById('vision-upload')
         };
@@ -279,6 +280,14 @@ class ChatInterface {
         // Attachment Action Menu Close Button
         if (this.elements.attachmentCloseBtn) {
             this.elements.attachmentCloseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.closeAttachmentMenu();
+            });
+        }
+
+        // Mobile Attachment Menu Backdrop Click
+        if (this.elements.attachmentMenuBackdrop) {
+            this.elements.attachmentMenuBackdrop.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.closeAttachmentMenu();
             });
@@ -1301,6 +1310,9 @@ class ChatInterface {
     openAttachmentMenu() {
         if (!this.elements.attachmentMenu) return;
         this.elements.attachmentMenu.classList.remove('hidden');
+        if (this.elements.attachmentMenuBackdrop) {
+            this.elements.attachmentMenuBackdrop.classList.remove('hidden');
+        }
         if (this.elements.attachmentPlusBtn) {
             this.elements.attachmentPlusBtn.classList.add('active');
             this.elements.attachmentPlusBtn.setAttribute('aria-expanded', 'true');
@@ -1310,6 +1322,9 @@ class ChatInterface {
     closeAttachmentMenu() {
         if (!this.elements.attachmentMenu) return;
         this.elements.attachmentMenu.classList.add('hidden');
+        if (this.elements.attachmentMenuBackdrop) {
+            this.elements.attachmentMenuBackdrop.classList.add('hidden');
+        }
         if (this.elements.attachmentPlusBtn) {
             this.elements.attachmentPlusBtn.classList.remove('active');
             this.elements.attachmentPlusBtn.setAttribute('aria-expanded', 'false');
@@ -1342,6 +1357,13 @@ class ChatInterface {
             case 'memory':
                 if (typeof this.openMemoryInspector === 'function') {
                     this.openMemoryInspector();
+                }
+                break;
+            case 'think':
+                if (this.elements.thinkingToggleBtn) {
+                    this.elements.thinkingToggleBtn.click();
+                } else {
+                    this.forceThinking = !this.forceThinking;
                 }
                 break;
             case 'search':
