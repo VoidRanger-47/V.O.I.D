@@ -4,9 +4,9 @@
   "private": true,
   "description": "V.O.I.D. — Virtual Operator of Information & Development Web Interface",
   "scripts": {
-    "dev": "serve .",
-    "start": "serve .",
-    "build": "node -e \"console.log('V.O.I.D. Web Assets Ready')\""
+    "dev": "serve public",
+    "start": "serve public",
+    "build": "node scripts/build-web.js"
   },
   "devDependencies": {
     "vercel": "^62.2.0"

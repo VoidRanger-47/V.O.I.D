@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V.O.I.D. Voice Diagnostics</title>
+    <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+    <link rel="alternate icon" type="image/png" href="/static/favicon.png">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', monospace;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #121316;
+            color: #E3E3E3;
+        }
+        h1 { color: #FF5500; display: flex; align-items: center; gap: 12px; }
+        h1 img { width: 36px; height: 36px; }
+        .section {
+            background: #191A1F;
+            border: 1px solid #2E303A;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: #202127;
+            border-left: 3px solid #FF5500;
+            border-radius: 4px;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .status.success { background: #4CAF50; color: white; }
+        .status.error { background: #f44336; color: white; }
+        .status.pending { background: #FF9800; color: white; }
+        button {
+            background: #A8C7FA;
+            color: #131314;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 5px 10px 0;
+        }
+        button:hover { background: #87B5FF; }
+        button:disabled { background: #666; cursor: not-allowed; }
+        #output {
+            background: #0a0a0a;
+            border: 1px solid #666;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+            color: #0F0;
+        }
+        .log-line {
+            margin: 4px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎤 V.O.I.D. Voice Diagnostics</h1>
+    
+    <div class="section">
+        <h2>1️⃣ Browser Capabilities</h2>
+        <div id="capabilities"></div>
+    </div>
+
+    <div class="section">
+        <h2>2️⃣ Audio Devices</h2>
+        <button onclick="listDevices()">List Devices</button>
+        <div id="devices"></div>
+    </div>
+
+    <div class="section">
+        <h2>3️⃣ Microphone Access</h2>
+        <button onclick="testMicrophone()">Request Microphone</button>
+        <button onclick="testRecording()" id="recordBtn" disabled>Record 3 Seconds</button>
+        <div id="microphone"></div>
+    </div>
+
+    <div class="section">
+        <h2>4️⃣ Upload Test</h2>
+        <button onclick="testUpload()" id="uploadBtn" disabled>Test Upload</button>
+        <div id="upload"></div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Console Output</h2>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        let recordedBlob = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+
+        function log(msg) {
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.textContent = msg;
+            document.getElementById('output').appendChild(line);
+            document.getElementById('output').scrollTop = document.getElementById('output').scrollHeight;
+            console.log(msg);
+        }
+
+        function checkCapabilities() {
+            log('🔍 Checking browser capabilities...\n');
+            
+            const checks = {
+                'getUserMedia': navigator.mediaDevices?.getUserMedia ? '✅' : '❌',
+                'MediaRecorder': window.MediaRecorder ? '✅' : '❌',
+                'AudioContext': (window.AudioContext || window.webkitAudioContext) ? '✅' : '❌',
+                'enumerateDevices': navigator.mediaDevices?.enumerateDevices ? '✅' : '❌'
+            };
+
+            for (const [name, status] of Object.entries(checks)) {
+                log(`${status} ${name}`);
+                const div = document.getElementById('capabilities');
+                div.innerHTML += `<div class="test-item">${name}: <span class="status ${status === '✅' ? 'success' : 'error'}">${status}</span></div>`;
+            }
+        }
+
+        function listDevices() {
+            if (!navigator.mediaDevices?.enumerateDevices) {
+                log('❌ enumerateDevices not supported');
+                return;
+            }
+
+            navigator.mediaDevices.enumerateDevices()
+                .then(devices => {
+                    log('\n📱 Available Devices:');
+                    let html = '';
+                    devices.forEach((device, i) => {
+                        log(`  ${i + 1}. ${device.label || 'Unknown'} (${device.kind})`);
+                        html += `<div class="test-item">${i + 1}. ${device.label || 'Unknown'} - ${device.kind}</div>`;
+                    });
+                    document.getElementById('devices').innerHTML = html;
+                })
+                .catch(err => {
+                    log('❌ Error: ' + err.message);
+                    document.getElementById('devices').innerHTML = `<div class="test-item"><span class="status error">ERROR</span> ${err.message}</div>`;
+                });
+        }
+
+        function testMicrophone() {
+            log('\n🎙️ Requesting microphone access...');
+            document.getElementById('microphone').innerHTML = '<div class="test-item"><span class="status pending">PENDING</span> Trying multiple constraint options...</div>';
+
+            // Try different constraint combinations
+            const constraintOptions = [
+                { audio: true },
+                { audio: { echoCancellation: false } },
+                { audio: { noiseSuppression: false } },
+                { audio: { autoGainControl: false } },
+                { audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }
+            ];
+
+            let attemptCount = 0;
+
+            const tryNextConstraint = () => {
+                if (attemptCount >= constraintOptions.length) {
+                    log('❌ All attempts failed. Windows may be blocking microphone access.');
+                    document.getElementById('microphone').innerHTML = '<div class="test-item"><span class="status error">BLOCKED</span> Windows is denying microphone access. Check Privacy Settings.</div>';
+                    return;
+                }
+
+                const constraints = constraintOptions[attemptCount];
+                log(`\n🔄 Attempt ${attemptCount + 1}: ${JSON.stringify(constraints)}`);
+                
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(stream => {
+                        log('✅ Microphone access GRANTED!');
+                        log(`   Successfully connected with constraints: ${JSON.stringify(constraints)}`);
+                        
+                        const tracks = stream.getAudioTracks();
+                        log(`   - Audio Tracks: ${tracks.length}`);
+                        
+                        if (tracks[0]) {
+                            const settings = tracks[0].getSettings();
+                            log(`   - Sample Rate: ${settings.sampleRate}Hz`);
+                            log(`   - Channel Count: ${settings.channelCount}`);
+                            log(`   - Track State: ${tracks[0].readyState}`);
+                        }
+
+                        document.getElementById('microphone').innerHTML = '<div class="test-item"><span class="status success">SUCCESS</span> Microphone access granted</div>';
+                        document.getElementById('recordBtn').disabled = false;
+                        window.micStream = stream;
+                    })
+                    .catch(err => {
+                        log(`❌ Attempt ${attemptCount + 1} failed: ${err.name} - ${err.message}`);
+                        attemptCount++;
+                        tryNextConstraint();
+                    });
+            };
+
+            tryNextConstraint();
+        }
+
+        function testRecording() {
+            if (!window.micStream) {
+                log('❌ No microphone stream available');
+                return;
+            }
+
+            log('\n⏹️ Starting 3-second recording...');
+            audioChunks = [];
+            recordedBlob = null;
+
+            try {
+                mediaRecorder = new MediaRecorder(window.micStream);
+                log(`✅ MediaRecorder created`);
+                log(`   - MIME Type: ${mediaRecorder.mimeType}`);
+                log(`   - State: ${mediaRecorder.state}`);
+
+                mediaRecorder.ondataavailable = (event) => {
+                    log(`📦 Data available: ${event.data.size} bytes`);
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    log(`✅ Recording stopped`);
+                    log(`   - Total chunks: ${audioChunks.length}`);
+                    log(`   - Total size: ${recordedBlob.size} bytes`);
+                    
+                    if (recordedBlob.size === 0) {
+                        log('⚠️  WARNING: Recorded blob is EMPTY!');
+                        document.getElementById('uploadBtn').disabled = true;
+                    } else {
+                        log('✅ Audio recorded successfully');
+                        document.getElementById('uploadBtn').disabled = false;
+                    }
+                };
+
+                mediaRecorder.onerror = (event) => {
+                    log(`❌ Recorder Error: ${event.error}`);
+                };
+
+                mediaRecorder.start();
+                document.getElementById('recordBtn').disabled = true;
+
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                    document.getElementById('recordBtn').disabled = false;
+                }, 3000);
+
+            } catch (err) {
+                log(`❌ MediaRecorder Error: ${err.message}`);
+            }
+        }
+
+        function testUpload() {
+            if (!recordedBlob || recordedBlob.size === 0) {
+                log('❌ No audio to upload');
+                return;
+            }
+
+            log('\n📤 Uploading audio to server...');
+            const formData = new FormData();
+            formData.append('audio', recordedBlob, 'test.webm');
+
+            fetch('/api/voice/chat', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                log('✅ Server Response:', JSON.stringify(data, null, 2));
+                if (data.status === 'success') {
+                    document.getElementById('upload').innerHTML = '<div class="test-item"><span class="status success">SUCCESS</span> Audio uploaded and processed</div>';
+                } else {
+                    document.getElementById('upload').innerHTML = `<div class="test-item"><span class="status error">ERROR</span> ${data.error}</div>`;
+                }
+            })
+            .catch(err => {
+                log('❌ Upload Error:', err.message);
+                document.getElementById('upload').innerHTML = `<div class="test-item"><span class="status error">ERROR</span> ${err.message}</div>`;
+            });
+        }
+
+        // Run initial checks
+        checkCapabilities();
+    </script>
+</body>
+</html>
