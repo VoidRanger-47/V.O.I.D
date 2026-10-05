@@ -1222,6 +1222,39 @@ code {
 .send-btn:active { transform: scale(0.97); }
 .send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 
+/* Stop button — glowing red/crimson square like modern AI chat */
+.stop-btn {
+    background: #ef4444;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    transition: opacity 0.2s, transform 0.15s, background-color 0.2s;
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+    animation: stopPulse 1.6s infinite ease-in-out;
+}
+
+.stop-btn:hover {
+    background: #dc2626;
+    transform: scale(1.06);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.65);
+}
+
+.stop-btn:active { transform: scale(0.95); }
+
+@keyframes stopPulse {
+    0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 18px rgba(239, 68, 68, 0.75); }
+}
+
 /* Toggle pills inside input — Think / Search */
 .input-toggle-btn {
     display: inline-flex;

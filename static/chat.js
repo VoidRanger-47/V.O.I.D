@@ -38,11 +38,14 @@ class ChatInterface {
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.voiceAvailable = false;
+        this.currentAbortController = null;
+        this.currentTaskId = null;
 
         // DOM Elements
         this.elements = {
             input: document.getElementById('user-input'),
             sendBtn: document.getElementById('send-btn'),
+            stopBtn: document.getElementById('stop-btn'),
             chatBox: document.getElementById('message-container'),
             historyList: document.getElementById('history-list'),
             fileInput: document.getElementById('file-upload'),
@@ -213,6 +216,10 @@ class ChatInterface {
 
         if (this.elements.sendBtn) {
             this.elements.sendBtn.addEventListener('click', () => this.sendMessage());
+        }
+
+        if (this.elements.stopBtn) {
+            this.elements.stopBtn.addEventListener('click', () => this.stopGeneration());
         }
 
         // Input container click-to-focus delegation
@@ -538,9 +545,14 @@ class ChatInterface {
             });
         }
 
-        // Close on Escape Key
+        // Close on Escape Key or Stop Generation
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                if (this.isGenerating) {
+                    e.preventDefault();
+                    this.stopGeneration();
+                    return;
+                }
                 if (this.elements.attachmentMenu && !this.elements.attachmentMenu.classList.contains('hidden')) {
                     this.closeAttachmentMenu();
                 }
@@ -881,6 +893,13 @@ class ChatInterface {
 
         // API Call
         this.isGenerating = true;
+        this.currentTaskId = `chat_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        this.currentAbortController = new AbortController();
+
+        // Toggle Buttons: Show Stop, Hide Send
+        if (this.elements.sendBtn) this.elements.sendBtn.classList.add('hidden');
+        if (this.elements.stopBtn) this.elements.stopBtn.classList.remove('hidden');
+
         this.elements.thinking.classList.remove('hidden');
         this.scrollToBottom();
 
@@ -892,7 +911,8 @@ class ChatInterface {
                 settings: this.settings,
                 thinking_mode: this.thinkingMode,
                 force_search: this.forceSearch,
-                gemini_api_key: geminiKey
+                gemini_api_key: geminiKey,
+                task_id: this.currentTaskId
             };
 
             let response = null;
@@ -905,9 +925,13 @@ class ChatInterface {
                         "Content-Type": "application/json",
                         "x-gemini-api-key": geminiKey
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    signal: this.currentAbortController.signal
                 });
             } catch (netErr) {
+                if (netErr.name === 'AbortError') {
+                    throw netErr;
+                }
                 console.warn("/api/chat/stream network fetch error:", netErr);
             }
 
@@ -925,13 +949,17 @@ class ChatInterface {
                                 temperature: this.settings.temperature || 0.7,
                                 maxOutputTokens: this.settings.maxTokens || 1024
                             }
-                        })
+                        }),
+                        signal: this.currentAbortController.signal
                     });
                     if (geminiRes.ok) {
                         response = geminiRes;
                         isDirectGemini = true;
                     }
                 } catch (gemErr) {
+                    if (gemErr.name === 'AbortError') {
+                        throw gemErr;
+                    }
                     console.warn("Direct Gemini client fallback error:", gemErr);
                 }
             }
@@ -1053,14 +1081,55 @@ class ChatInterface {
                 this.scrollToBottom();
             }
 
-            this.isGenerating = false;
-
         } catch (error) {
-            console.error("Streaming error:", error);
-            this.elements.thinking.classList.add('hidden');
-            this.appendMessage('void', `**System Notice**: Stream disconnected or encountered an error (${error.message}).`);
+            if (error.name === 'AbortError') {
+                console.log("Generation aborted by operator.");
+                const lastMsg = this.elements.chatBox.querySelector('.message-row.void-msg:last-child .text-body');
+                if (lastMsg) {
+                    lastMsg.innerHTML = lastMsg.innerHTML.replace('<span class="cursor-blink"></span>', '') + ' <em style="color:var(--text-muted); font-size:0.85em;">[Halted]</em>';
+                }
+            } else {
+                console.error("Streaming error:", error);
+                this.elements.thinking.classList.add('hidden');
+                this.appendMessage('void', `**System Notice**: Stream disconnected or encountered an error (${error.message}).`);
+            }
+        } finally {
             this.isGenerating = false;
+            this.currentAbortController = null;
+            this.currentTaskId = null;
+            this.elements.thinking.classList.add('hidden');
+            if (this.elements.sendBtn) this.elements.sendBtn.classList.remove('hidden');
+            if (this.elements.stopBtn) this.elements.stopBtn.classList.add('hidden');
+            if (this.elements.input) this.elements.input.focus();
         }
+    }
+
+    async stopGeneration() {
+        if (!this.isGenerating) return;
+
+        // 1. Abort client stream fetch
+        if (this.currentAbortController) {
+            this.currentAbortController.abort();
+        }
+
+        // 2. Notify server to immediately kill inference thread and free VRAM
+        const taskId = this.currentTaskId;
+        try {
+            fetch('/api/chat/stop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task_id: taskId })
+            }).catch(() => {});
+        } catch(e) {}
+
+        // 3. Reset generation flags & button UI
+        this.isGenerating = false;
+        this.currentAbortController = null;
+        this.currentTaskId = null;
+        if (this.elements.thinking) this.elements.thinking.classList.add('hidden');
+        if (this.elements.sendBtn) this.elements.sendBtn.classList.remove('hidden');
+        if (this.elements.stopBtn) this.elements.stopBtn.classList.add('hidden');
+        if (this.elements.input) this.elements.input.focus();
     }
 
     appendStreamingMessage() {
