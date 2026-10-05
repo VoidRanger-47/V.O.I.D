@@ -885,21 +885,60 @@ class ChatInterface {
         this.scrollToBottom();
 
         try {
+            const geminiKey = localStorage.getItem('void_gemini_api_key') || '';
             const payload = { 
                 message: text, 
                 files: fileData,
                 settings: this.settings,
                 thinking_mode: this.thinkingMode,
-                force_search: this.forceSearch
+                force_search: this.forceSearch,
+                gemini_api_key: geminiKey
             };
 
-            const response = await fetch("/api/chat/stream", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
+            let response = null;
+            let isDirectGemini = false;
 
-            if (!response.ok) throw new Error(`Server returned HTTP ${response.status}`);
+            try {
+                response = await fetch("/api/chat/stream", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "x-gemini-api-key": geminiKey
+                    },
+                    body: JSON.stringify(payload)
+                });
+            } catch (netErr) {
+                console.warn("/api/chat/stream network fetch error:", netErr);
+            }
+
+            // Client-side fallback if server endpoint is 404 or down and Gemini key is configured
+            if ((!response || !response.ok) && geminiKey) {
+                try {
+                    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${encodeURIComponent(geminiKey.trim())}`;
+                    const geminiRes = await fetch(geminiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            systemInstruction: { parts: [{ text: "You are V.O.I.D. (Versatile Omnipresent Intelligent Device), an ultra-advanced cybernetic AI companion and autonomous assistant. Answer concisely and articulately with a sleek dark aesthetic." }] },
+                            contents: [{ role: "user", parts: [{ text: text }] }],
+                            generationConfig: {
+                                temperature: this.settings.temperature || 0.7,
+                                maxOutputTokens: this.settings.maxTokens || 1024
+                            }
+                        })
+                    });
+                    if (geminiRes.ok) {
+                        response = geminiRes;
+                        isDirectGemini = true;
+                    }
+                } catch (gemErr) {
+                    console.warn("Direct Gemini client fallback error:", gemErr);
+                }
+            }
+
+            if (!response || !response.ok) {
+                throw new Error(response ? `Server returned HTTP ${response.status}` : 'Unable to connect to local or cloud V.O.I.D. core');
+            }
 
             this.elements.thinking.classList.add('hidden');
             const { row, contentDiv, toolBadge, speakBtn } = this.appendStreamingMessage();
@@ -915,10 +954,36 @@ class ChatInterface {
                     const line = rawLine.trim();
                     if (!line.startsWith("data:")) continue;
                     const jsonStr = line.replace(/^data:\s*/, '').trim();
-                    if (!jsonStr) continue;
+                    if (!jsonStr || jsonStr === '[DONE]') continue;
 
                     try {
                         const evt = JSON.parse(jsonStr);
+
+                        if (isDirectGemini) {
+                            const partText = evt.candidates?.[0]?.content?.parts?.[0]?.text;
+                            if (partText) {
+                                accumulatedText += partText;
+                                contentDiv.innerHTML = this.formatText(accumulatedText) + ' <span class="cursor-blink"></span>';
+                                this.detectAndRenderArtifacts(accumulatedText);
+                                this.attachCopyListeners(row);
+                                this.attachSpeakListeners(row, accumulatedText);
+                                this.scrollToBottom();
+                            }
+                            if (evt.candidates?.[0]?.finishReason) {
+                                streamDoneReceived = true;
+                                this.isGenerating = false;
+                                contentDiv.innerHTML = this.formatText(accumulatedText);
+                                this.detectAndRenderArtifacts(accumulatedText);
+                                this.saveToHistory('void', accumulatedText);
+                                this.attachCopyListeners(row);
+                                this.attachSpeakListeners(row, accumulatedText);
+                                this.scrollToBottom();
+                                if (this.autoSpeak) {
+                                    this.speakText(accumulatedText, speakBtn);
+                                }
+                            }
+                            continue;
+                        }
 
                         if (evt.type === 'tool_call') {
                             toolBadge.innerHTML += `<div class="tool-badge-card"><span class="tool-badge-icon">${evt.icon || '⚡'}</span> <span>Executed <strong>${evt.name || evt.tool}</strong></span></div>`;
@@ -1182,6 +1247,10 @@ class ChatInterface {
             this.elements.voiceRate.value = this.speechRate;
             if (this.elements.voiceRateVal) this.elements.voiceRateVal.textContent = this.speechRate.toFixed(1) + 'x';
         }
+        const geminiInput = document.getElementById('gemini-api-key-input');
+        if (geminiInput) {
+            geminiInput.value = localStorage.getItem('void_gemini_api_key') || '';
+        }
     }
 
     updateSettings(key, value) {
@@ -1201,6 +1270,10 @@ class ChatInterface {
     }
 
     closeSettingsModal() {
+        const geminiInput = document.getElementById('gemini-api-key-input');
+        if (geminiInput) {
+            localStorage.setItem('void_gemini_api_key', geminiInput.value.trim());
+        }
         this.elements.settingsModal.classList.add('hidden');
     }
     

@@ -87,7 +87,8 @@ class VoidAgent:
         goal: str,
         force_search: bool = False,
         thinking_mode: bool = False,
-        user_settings: Optional[Dict[str, Any]] = None
+        user_settings: Optional[Dict[str, Any]] = None,
+        token_callback: Optional[Any] = None
     ) -> AgentResult:
         """
         Executes a user goal through the Meta-Cognitive Supervisor and Multi-Agent Network.
@@ -119,9 +120,11 @@ class VoidAgent:
                 "force_search": force_search,
                 "thinking_mode": thinking_mode,
                 "settings": user_settings or {},
-                "procedural_rules": relevant_rules
+                "procedural_rules": relevant_rules,
+                "token_callback": token_callback
             }
         )
+
 
         response_msg = self.coordinator.route_message(task_msg)
         duration = round(time.time() - start_time, 4)

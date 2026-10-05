@@ -234,6 +234,29 @@ class PlanningAgent(BaseAgent):
             ]
 
         # 8. General conversational / coding request
+        if any(k in low for k in ["code", "python", "debug", "script", "function", "class", "refactor"]):
+            return [
+                {
+                    "step_id": 1,
+                    "agent": "memory_agent",
+                    "goal": f"Fetch context for: {clean}",
+                    "payload": {"action": "inject_context", "query": clean},
+                    "dependencies": [],
+                    "can_parallelize": False,
+                    "priority": AgentPriority.NORMAL
+                },
+                {
+                    "step_id": 2,
+                    "agent": "coding_agent",
+                    "goal": clean,
+                    "payload": {"query": clean},
+                    "dependencies": [1],
+                    "can_parallelize": False,
+                    "priority": AgentPriority.NORMAL
+                }
+            ]
+
+        # For conversation, fetch relevant context into workspace and let Executive synthesize
         return [
             {
                 "step_id": 1,
@@ -243,14 +266,6 @@ class PlanningAgent(BaseAgent):
                 "dependencies": [],
                 "can_parallelize": False,
                 "priority": AgentPriority.NORMAL
-            },
-            {
-                "step_id": 2,
-                "agent": "coding_agent" if any(k in low for k in ["code", "python", "debug", "script"]) else "executive",
-                "goal": clean,
-                "payload": {"query": clean},
-                "dependencies": [1],
-                "can_parallelize": False,
-                "priority": AgentPriority.NORMAL
             }
         ]
+

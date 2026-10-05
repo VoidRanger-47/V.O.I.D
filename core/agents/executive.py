@@ -50,6 +50,34 @@ class ExecutiveAgent(BaseAgent):
         force_search = bool(message.payload.get("force_search", False))
         thinking_mode = bool(message.payload.get("thinking_mode", False))
 
+        token_callback = message.payload.get("token_callback")
+
+        # Handle direct scheduler invocation without recursion
+        if message.sender == "scheduler":
+            provider = self.model_mgr.get_active_provider() or self.model_mgr.get_provider("local_transformer")
+            if token_callback and hasattr(provider, "generate_stream"):
+                toks = []
+                for tok in provider.generate_stream(goal, max_new_tokens=250, temperature=0.5):
+                    toks.append(tok)
+                    try:
+                        token_callback(tok)
+                    except Exception:
+                        pass
+                final_ans = "".join(toks).strip()
+            else:
+                final_ans = provider.generate(goal, max_new_tokens=250, temperature=0.5)
+
+            return AgentMessage(
+                sender=self.name,
+                receiver=message.sender,
+                task_id=message.task_id,
+                mission_id=message.mission_id,
+                message_type=AgentMessageType.RESPONSE,
+                status="SUCCESS",
+                result=final_ans,
+                payload={"final_answer": final_ans}
+            )
+
         # ===================================================================
         # STAGE 0: FAST PATH CHECK (Deterministic, Ultra-low Latency, 0 VRAM)
         # ===================================================================
@@ -60,6 +88,16 @@ class ExecutiveAgent(BaseAgent):
         )
 
         if path_decision == ExecutionPath.FAST_PATH and fast_result is not None:
+            # Stream fast tokens immediately if callback provided
+            if token_callback:
+                import re
+                words = re.findall(r'\S+|\s+', fast_result)
+                for w in words:
+                    try:
+                        token_callback(w)
+                    except Exception:
+                        pass
+
             # Evaluate memory write policy even for fast results
             verdict, score, _ = self.memory_policy.evaluate(goal, fast_result, is_multi_step=False)
             if verdict != MemoryVerdict.REJECT:
@@ -115,8 +153,10 @@ class ExecutiveAgent(BaseAgent):
         # ===================================================================
         # STAGE 3: PARALLEL DAG EXECUTION & SYNTHESIS
         # ===================================================================
+        # Exclude 'executive' from subagent step dispatching to guarantee no recursive deadlock
+        subagent_steps = [s for s in steps if s.get("agent") != "executive"]
         step_results = self.coordinator.execute_parallel_dag(
-            steps=steps,
+            steps=subagent_steps,
             workspace=workspace,
             mission_id=message.mission_id
         )
@@ -128,28 +168,50 @@ class ExecutiveAgent(BaseAgent):
                 if res.result and len(str(res.result)) > 5:
                     final_answer = str(res.result)
 
-        # If no single direct answer, synthesize via compressed context
-        if not final_answer or len(steps) > 2:
+        # If no single direct answer or conversational goal, synthesize via compressed context
+        if not final_answer:
             synthesis_context = self.context_mgr.build_synthesis_context(goal, workspace=workspace)
 
-            # Check if neural model execution is requested or if we can summarize findings
-            if any(s.get("agent") == "executive" for s in steps) or len(step_results) >= 2:
-                safe, vram_msg = self.vram_mgr.is_safe_for_inference(estimated_mb=400.0)
-                if safe:
-                    provider = self.model_mgr.get_active_provider()
-                    prompt = (
-                        f"{synthesis_context}\n\n"
-                        f"### User Goal:\n{goal}\n"
-                        f"### V.O.I.D. Synthesis:\n"
-                    )
-                    final_answer = provider.generate(prompt, max_new_tokens=350, temperature=0.5)
+            safe, vram_msg = self.vram_mgr.is_safe_for_inference(estimated_mb=400.0)
+            if safe:
+                provider = self.model_mgr.get_active_provider()
+                if provider is None:
+                    provider = self.model_mgr.get_provider("local_transformer")
+                prompt = (
+                    f"{synthesis_context}\n\n"
+                    f"### User Goal:\n{goal}\n"
+                    f"### V.O.I.D. Synthesis:\n"
+                )
+                if token_callback and hasattr(provider, "generate_stream"):
+                    toks = []
+                    for tok in provider.generate_stream(prompt, max_new_tokens=350, temperature=0.5):
+                        toks.append(tok)
+                        try:
+                            token_callback(tok)
+                        except Exception:
+                            pass
+                    final_answer = "".join(toks).strip() or "I am listening. How can I assist you further?"
                 else:
-                    # Fallback to structured deterministic aggregation under extreme VRAM pressure
-                    summaries = [f"[{s.receiver.upper()}]: {s.result}" for s in step_results if s.result]
-                    final_answer = "\n\n".join(summaries) if summaries else "Goal executed successfully."
+                    final_answer = provider.generate(prompt, max_new_tokens=350, temperature=0.5)
             else:
                 summaries = [f"[{s.receiver.upper()}]: {s.result}" for s in step_results if s.result]
                 final_answer = "\n\n".join(summaries) if summaries else "Goal executed successfully."
+                if token_callback:
+                    import re
+                    for w in re.findall(r'\S+|\s+', final_answer):
+                        try:
+                            token_callback(w)
+                        except Exception:
+                            pass
+        elif token_callback and final_answer:
+            import re
+            for w in re.findall(r'\S+|\s+', final_answer):
+                try:
+                    token_callback(w)
+                except Exception:
+                    pass
+
+
 
         # ===================================================================
         # STAGE 4: VERIFICATION AUDIT

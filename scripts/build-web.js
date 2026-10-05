@@ -22,4 +22,10 @@ const templatesSrc = path.join(rootDir, 'templates');
 const templatesDest = path.join(publicDir, 'templates');
 fs.cpSync(templatesSrc, templatesDest, { recursive: true });
 
+// 4. Ensure vision.html is available directly at public/vision.html
+const visionSrc = path.join(templatesSrc, 'vision.html');
+if (fs.existsSync(visionSrc)) {
+  fs.copyFileSync(visionSrc, path.join(publicDir, 'vision.html'));
+}
+
 console.log('✓ V.O.I.D. public assets generated successfully in public/');

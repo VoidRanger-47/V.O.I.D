@@ -230,48 +230,93 @@ def api_chat_stream():
                     yield f"data: {json.dumps({'type': 'tool_call', 'tool': 'reasoning_engine', 'name': 'Deep Reasoning Chain', 'icon': '💭'})}\n\n"
                     time.sleep(0.02)
 
-                # Execute through the 10-Phase AGI Cognitive Architecture
-                agent_res = void_agent.run_task(
-                    full_context_message,
-                    force_search=force_search,
-                    thinking_mode=thinking_mode,
-                    user_settings=user_settings
-                )
+                # Run multi-agent execution with real-time token streaming queue
+                import queue
+                import threading
 
-                # Emit executed tools to Web / Mobile stream
-                for tool_name, tool_result in agent_res.executed_tools:
-                    if tool_name not in ["meta_cognition", "experience_memory"]:
-                        tool_info = AVAILABLE_TOOLS.get(tool_name, {"name": tool_name.replace("_", " ").title(), "icon": "⚡"})
-                        yield f"data: {json.dumps({'type': 'tool_call', 'tool': tool_name, 'name': tool_info.get('name', tool_name), 'icon': tool_info.get('icon', '⚡')})}\n\n"
-                        time.sleep(0.02)
+                token_queue = queue.Queue()
+                task_done = threading.Event()
+                task_container = {}
 
-                yield f"data: {json.dumps({'type': 'start_generation', 'skill': agent_res.skill})}\n\n"
+                def worker():
+                    try:
+                        res = void_agent.run_task(
+                            full_context_message,
+                            force_search=force_search,
+                            thinking_mode=thinking_mode,
+                            user_settings=user_settings,
+                            token_callback=lambda tok: token_queue.put(tok)
+                        )
+                        task_container["res"] = res
+                    except Exception as ex:
+                        task_container["err"] = ex
+                    finally:
+                        task_done.set()
+
+                th = threading.Thread(target=worker, daemon=True)
+                th.start()
 
                 accumulated = ""
-                final_text = agent_res.response or "I am V.O.I.D., your cognitive AI assistant."
+                has_started_gen = False
 
-                words = final_text.split(" ")
-                for i, w in enumerate(words):
+                while not task_done.is_set() or not token_queue.empty():
                     if task_lifecycle.should_stop(task_id):
                         yield f"data: {json.dumps({'token': ' [Generation stopped]', 'done': True, 'stopped': True})}\n\n"
                         vram_manager.cleanup_vram(force=True)
                         break
-                    tok = w + (" " if i < len(words) - 1 else "")
-                    accumulated += tok
-                    yield f"data: {json.dumps({'token': tok, 'done': False})}\n\n"
-                    time.sleep(0.012)
 
-                CHAT_SESSIONS.append({"role": "user", "content": message, "timestamp": time.time()})
-                CHAT_SESSIONS.append({"role": "assistant", "content": accumulated, "skill": agent_res.skill, "timestamp": time.time()})
-                void_mem.working_memory.append(f"User: {message}")
-                void_mem.working_memory.append(f"V.O.I.D.: {accumulated}")
-                try:
-                    void_mem.manager.extract_and_store_from_turn(message, accumulated, project_id="VOID")
-                except Exception:
-                    pass
+                    try:
+                        tok = token_queue.get(timeout=0.03)
+                        if not has_started_gen:
+                            yield f"data: {json.dumps({'type': 'start_generation', 'skill': 'conversation'})}\n\n"
+                            has_started_gen = True
+                        accumulated += tok
+                        yield f"data: {json.dumps({'token': tok, 'done': False})}\n\n"
+                    except queue.Empty:
+                        pass
 
-                task_lifecycle.complete_task(task_id)
-                yield f"data: {json.dumps({'done': True, 'skill': agent_res.skill, 'cognitive_state': agent_res.cognitive_state})}\n\n"
+                th.join(timeout=2.0)
+
+                if "err" in task_container:
+                    raise task_container["err"]
+
+                agent_res = task_container.get("res")
+                if agent_res:
+                    # Emit executed tools to Web / Mobile stream
+                    for tool_name, tool_result in agent_res.executed_tools:
+                        if tool_name not in ["meta_cognition", "experience_memory"]:
+                            tool_info = AVAILABLE_TOOLS.get(tool_name, {"name": tool_name.replace("_", " ").title(), "icon": "⚡"})
+                            yield f"data: {json.dumps({'type': 'tool_call', 'tool': tool_name, 'name': tool_info.get('name', tool_name), 'icon': tool_info.get('icon', '⚡')})}\n\n"
+
+                    # If no tokens were streamed (e.g. direct fast path output), stream words smoothly
+                    if not accumulated and agent_res.response:
+                        final_text = agent_res.response
+                        if not has_started_gen:
+                            yield f"data: {json.dumps({'type': 'start_generation', 'skill': agent_res.skill})}\n\n"
+                            has_started_gen = True
+                        words = re.findall(r'\S+|\s+', final_text)
+                        for w in words:
+                            if task_lifecycle.should_stop(task_id):
+                                break
+                            accumulated += w
+                            yield f"data: {json.dumps({'token': w, 'done': False})}\n\n"
+                            time.sleep(0.01)
+
+                    CHAT_SESSIONS.append({"role": "user", "content": message, "timestamp": time.time()})
+                    CHAT_SESSIONS.append({"role": "assistant", "content": accumulated, "skill": agent_res.skill, "timestamp": time.time()})
+                    void_mem.working_memory.append(f"User: {message}")
+                    void_mem.working_memory.append(f"V.O.I.D.: {accumulated}")
+                    try:
+                        void_mem.manager.extract_and_store_from_turn(message, accumulated, project_id="VOID")
+                    except Exception:
+                        pass
+
+                    task_lifecycle.complete_task(task_id)
+                    yield f"data: {json.dumps({'done': True, 'skill': agent_res.skill, 'cognitive_state': agent_res.cognitive_state})}\n\n"
+                else:
+                    task_lifecycle.complete_task(task_id)
+                    yield f"data: {json.dumps({'done': True})}\n\n"
+
 
             except Exception as e:
                 print(f"Streaming generator internal error: {e}")
