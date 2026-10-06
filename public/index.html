@@ -51,6 +51,12 @@
             <div class="sidebar-nav-section">
                 <div class="sidebar-nav-label">Features</div>
 
+                <a href="/studio" class="sidebar-nav-item" style="text-decoration:none;color:inherit;">
+                    <i class="fa-solid fa-microchip" style="color: #ff6b00;"></i>
+                    <span>Studio Cockpit</span>
+                    <span class="sidebar-nav-badge" style="background: rgba(255, 107, 0, 0.2); color: #ff851b; border: 1px solid rgba(255, 107, 0, 0.4);">MK-IV</span>
+                </a>
+
                 <a href="/vision" class="sidebar-nav-item" style="text-decoration:none;color:inherit;">
                     <i class="fa-solid fa-eye"></i>
                     <span>Vision HUD</span>
@@ -116,6 +122,7 @@
                     <span id="network-badge" class="network-badge offline" title="Offline-First Engine"><i class="fa-solid fa-shield-halved"></i> <span>100% Local Engine</span></span>
                 </div>
                 <div class="top-actions">
+                    <a href="/studio" class="icon-btn" title="Open V.O.I.D. Studio Cockpit IDE (MK-IV)" style="text-decoration: none; color: #ff851b;"><i class="fa-solid fa-microchip"></i></a>
                     <a href="/vision" class="icon-btn" title="Open Dedicated Vision HUD Webpage" style="text-decoration: none;"><i class="fa-solid fa-eye"></i></a>
                     <button class="icon-btn" id="image-studio-btn" title="Offline Image Studio & Gallery" data-modal-target="#image-studio-modal" onclick="ChatApp.openImageStudio()"><i class="fa-solid fa-palette"></i></button>
                     <button class="icon-btn" id="desktop-mcp-btn" title="Desktop GUI & MCP Control Layer" data-modal-target="#desktop-mcp-modal" onclick="ChatApp.openDesktopMcpModal()"><i class="fa-solid fa-desktop"></i></button>
@@ -145,6 +152,7 @@
                     </div>
 
                     <div class="suggestions">
+                        <div class="chip" onclick="window.location.href='/studio'">⚡ Open Studio Cockpit</div>
                         <div class="chip" onclick="ChatApp.quickPrompt('V.O.I.D., activate vision.')">👁️ Activate Vision</div>
                         <div class="chip" onclick="ChatApp.quickPrompt('What do you see?')">🔍 What do you see?</div>
                         <div class="chip" onclick="ChatApp.quickPrompt('Open VS Code and work on my project')">💻 Open VS Code</div>

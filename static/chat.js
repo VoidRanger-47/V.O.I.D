@@ -33,13 +33,18 @@ class ChatInterface {
         this.speechRate = parseFloat(localStorage.getItem('void_speech_rate')) || 1.0;
         this.currentAudioElement = null;
 
-        // Voice Recording State
+        // Voice Recording & Wake Word State
         this.isRecording = false;
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.voiceAvailable = false;
         this.currentAbortController = null;
         this.currentTaskId = null;
+        this.wakeWordEnabled = localStorage.getItem('void_wake_word_enabled') === 'true';
+        this.wakeWordRecognition = null;
+        this.isWakeWordListening = false;
+        this.wakeWordRestartTimer = null;
+        this.isSpeaking = false;
 
         // DOM Elements
         this.elements = {
@@ -80,6 +85,10 @@ class ChatInterface {
             voiceBtn: document.getElementById('voice-btn'),
             voiceStatus: document.getElementById('voice-status'),
             voiceStatusText: document.getElementById('voice-status-text'),
+            wakeWordBtn: document.getElementById('wake-word-btn'),
+            wakeWordCheckbox: document.getElementById('wake-word-checkbox'),
+            wakeWordIndicator: document.getElementById('wake-word-indicator'),
+            wakeWordIndicatorText: document.getElementById('wake-word-indicator-text'),
             thinkingToggleBtn: document.getElementById('thinking-toggle-btn'),
             searchToggleBtn: document.getElementById('search-toggle-btn'),
             autoSpeakBtn: document.getElementById('auto-speak-btn'),
@@ -117,6 +126,7 @@ class ChatInterface {
         this.setupEventListeners();
         this.initSpeechVoices();
         this.checkVoiceAvailability();
+        this.initWakeWord();
         this.checkNetworkStatus();
         
         // STRICT CAMERA ACCESS POLICY: Ensure camera hardware is decoupled when on chat page
@@ -628,6 +638,16 @@ class ChatInterface {
         if (this.elements.voiceBtn) {
             this.elements.voiceBtn.addEventListener('click', () => this.toggleVoiceRecording());
         }
+
+        // Hands-Free Wake Word Listeners
+        if (this.elements.wakeWordBtn) {
+            this.elements.wakeWordBtn.addEventListener('click', () => this.toggleWakeWord());
+        }
+        if (this.elements.wakeWordCheckbox) {
+            this.elements.wakeWordCheckbox.addEventListener('change', (e) => {
+                this.setWakeWordEnabled(e.target.checked);
+            });
+        }
     }
 
 
@@ -660,6 +680,7 @@ class ChatInterface {
     }
 
     stopSpeech() {
+        this.isSpeaking = false;
         if (this.speechSynth) {
             try { this.speechSynth.cancel(); } catch (e) {}
         }
@@ -696,6 +717,8 @@ class ChatInterface {
             return; // Toggle off if clicked on active button
         }
 
+        this.isSpeaking = true;
+
         const cleanText = this.cleanTextForSpeech(text);
         if (!cleanText) return;
 
@@ -718,6 +741,7 @@ class ChatInterface {
         }
 
         const restoreButton = () => {
+            this.isSpeaking = false;
             if (btnElement) {
                 btnElement.classList.remove('speaking');
                 btnElement.dataset.speaking = "false";
@@ -805,6 +829,7 @@ class ChatInterface {
         let idx = 0;
         const speakNextChunk = () => {
             if (idx >= chunks.length) {
+                this.isSpeaking = false;
                 if (btnElement) {
                     btnElement.classList.remove('speaking');
                     btnElement.dataset.speaking = "false";
@@ -827,6 +852,7 @@ class ChatInterface {
 
             utterance.onerror = (e) => {
                 console.warn("SpeechSynthesis error, falling back to Server TTS:", e);
+                this.isSpeaking = false;
                 if (btnElement) {
                     btnElement.classList.remove('speaking');
                     btnElement.dataset.speaking = "false";
@@ -1686,6 +1712,12 @@ class ChatInterface {
         // Barge-in: Stop any ongoing speech playback
         this.stopSpeech();
         this.audioChunks = [];
+
+        // Pause background wake word detection while manual recording is active
+        if (this.wakeWordRecognition && this.isWakeWordListening) {
+            try { this.wakeWordRecognition.stop(); } catch (e) {}
+            this.isWakeWordListening = false;
+        }
         
         // Try multiple constraint options to find what works
         const constraintOptions = [
@@ -1768,6 +1800,14 @@ class ChatInterface {
             this.isRecording = false;
             this.elements.voiceBtn.classList.remove('recording');
             this.elements.voiceStatusText.textContent = '⏳ Processing audio...';
+
+            // Re-arm wake word detection if enabled
+            if (this.wakeWordEnabled) {
+                clearTimeout(this.wakeWordRestartTimer);
+                this.wakeWordRestartTimer = setTimeout(() => {
+                    this.startWakeWordListening();
+                }, 1200);
+            }
         }
     }
 
@@ -1845,6 +1885,240 @@ class ChatInterface {
         if (!responseText) return;
         console.log('🔊 Speaking model response through web audio...');
         this.speakText(responseText);
+    }
+
+    /* --- Hands-Free Wake Word System ("Hey VOID") --- */
+    initWakeWord() {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) {
+            console.warn("SpeechRecognition API not available in this browser. (Use Chrome, Edge, or Brave for hands-free wake word).");
+            if (this.elements.wakeWordBtn) {
+                this.elements.wakeWordBtn.style.opacity = '0.4';
+                this.elements.wakeWordBtn.title = "Hands-Free Wake Word (Requires Chrome, Edge, or SpeechRecognition API)";
+            }
+            if (this.elements.wakeWordCheckbox) {
+                this.elements.wakeWordCheckbox.disabled = true;
+            }
+            return;
+        }
+
+        try {
+            this.wakeWordRecognition = new SpeechRec();
+            this.wakeWordRecognition.continuous = true;
+            this.wakeWordRecognition.interimResults = true;
+            this.wakeWordRecognition.lang = 'en-US';
+
+            this.wakeWordRecognition.onstart = () => {
+                this.isWakeWordListening = true;
+                this.updateWakeWordUI();
+            };
+
+            this.wakeWordRecognition.onresult = (event) => {
+                // Ignore while assistant is generating, speaking, or recording
+                if (this.isRecording || this.isSpeaking || this.isGenerating) return;
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const result = event.results[i];
+                    const transcript = result[0].transcript;
+                    const isFinal = result.isFinal;
+
+                    const wakeRegex = /\b(?:hey\s+|ok\s+|okay\s+|hello\s+|hi\s+|yo\s+)?(?:void|voyd|boyd|loyd|v\.o\.i\.d\.)\b/i;
+                    if (wakeRegex.test(transcript)) {
+                        this.handleWakeWordDetection(transcript, isFinal);
+                        break;
+                    }
+                }
+            };
+
+            this.wakeWordRecognition.onerror = (event) => {
+                if (event.error === 'not-allowed') {
+                    console.warn("Microphone permission denied for Wake Word.");
+                    this.setWakeWordEnabled(false);
+                } else if (event.error !== 'no-speech' && event.error !== 'aborted') {
+                    console.warn("Wake word recognition notice:", event.error);
+                }
+            };
+
+            this.wakeWordRecognition.onend = () => {
+                this.isWakeWordListening = false;
+                // Automatically restart if wake word is still enabled and we aren't manually recording
+                if (this.wakeWordEnabled && !this.isRecording) {
+                    clearTimeout(this.wakeWordRestartTimer);
+                    this.wakeWordRestartTimer = setTimeout(() => {
+                        this.startWakeWordListening();
+                    }, 400);
+                } else {
+                    this.updateWakeWordUI();
+                }
+            };
+
+            if (this.wakeWordEnabled) {
+                this.startWakeWordListening();
+            } else {
+                this.updateWakeWordUI();
+            }
+
+        } catch (err) {
+            console.error("Failed to initialize Wake Word engine:", err);
+        }
+    }
+
+    startWakeWordListening() {
+        if (!this.wakeWordRecognition || this.isWakeWordListening || this.isRecording) return;
+        try {
+            this.wakeWordRecognition.start();
+        } catch (e) {
+            // Already started or restarting
+            this.isWakeWordListening = true;
+            this.updateWakeWordUI();
+        }
+    }
+
+    stopWakeWordListening() {
+        if (!this.wakeWordRecognition) return;
+        clearTimeout(this.wakeWordRestartTimer);
+        try {
+            this.wakeWordRecognition.stop();
+        } catch (e) {}
+        this.isWakeWordListening = false;
+        this.updateWakeWordUI();
+    }
+
+    toggleWakeWord() {
+        this.setWakeWordEnabled(!this.wakeWordEnabled);
+    }
+
+    setWakeWordEnabled(enabled) {
+        this.wakeWordEnabled = !!enabled;
+        localStorage.setItem('void_wake_word_enabled', this.wakeWordEnabled ? 'true' : 'false');
+        if (this.wakeWordEnabled) {
+            this.startWakeWordListening();
+        } else {
+            this.stopWakeWordListening();
+        }
+        this.updateWakeWordUI();
+    }
+
+    updateWakeWordUI() {
+        const isActive = this.wakeWordEnabled && this.isWakeWordListening;
+        if (this.elements.wakeWordBtn) {
+            if (this.wakeWordEnabled) {
+                this.elements.wakeWordBtn.classList.add('active');
+                this.elements.wakeWordBtn.title = "Hands-Free Wake Word Active (Say 'Hey VOID' to talk)";
+                this.elements.wakeWordBtn.innerHTML = '<i class="fa-solid fa-ear-listen" style="color: var(--accent-color, #70a5ff);"></i>';
+            } else {
+                this.elements.wakeWordBtn.classList.remove('active');
+                this.elements.wakeWordBtn.title = "Hands-Free Wake Word Disabled (Click to Enable)";
+                this.elements.wakeWordBtn.innerHTML = '<i class="fa-solid fa-ear-listen"></i>';
+            }
+        }
+        if (this.elements.wakeWordCheckbox) {
+            this.elements.wakeWordCheckbox.checked = this.wakeWordEnabled;
+        }
+        if (this.elements.wakeWordIndicator) {
+            if (isActive) {
+                this.elements.wakeWordIndicator.classList.remove('hidden');
+                this.elements.wakeWordIndicator.style.display = 'inline-flex';
+                if (this.elements.wakeWordIndicatorText) {
+                    this.elements.wakeWordIndicatorText.textContent = 'Listening for "Hey VOID"';
+                }
+            } else {
+                this.elements.wakeWordIndicator.classList.add('hidden');
+                this.elements.wakeWordIndicator.style.display = 'none';
+            }
+        }
+    }
+
+    playActivationChime() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+
+            // Tone 1: 523.25 Hz (C5)
+            const osc1 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(523.25, now);
+            gain1.gain.setValueAtTime(0.12, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+            osc1.connect(gain1);
+            gain1.connect(ctx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.14);
+
+            // Tone 2: 783.99 Hz (G5)
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(783.99, now + 0.10);
+            gain2.gain.setValueAtTime(0.14, now + 0.10);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.30);
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start(now + 0.10);
+            osc2.stop(now + 0.30);
+        } catch (e) {
+            // AudioContext autoplay restrictions before initial user gesture
+            console.debug("Activation chime delayed until user gesture:", e);
+        }
+    }
+
+    handleWakeWordDetection(transcript, isFinal) {
+        console.log(`⚡ Wake Word Triggered: "${transcript}" (final=${isFinal})`);
+
+        this.playActivationChime();
+
+        if (this.elements.wakeWordIndicator) {
+            this.elements.wakeWordIndicator.classList.add('triggered');
+            if (this.elements.wakeWordIndicatorText) {
+                this.elements.wakeWordIndicatorText.textContent = '⚡ Wake Word Detected!';
+            }
+        }
+
+        // Extract command portion following the wake phrase
+        const wakePrefixRegex = /^(?:.*?\b(?:hey\s+|ok\s+|okay\s+|hello\s+|hi\s+|yo\s+)?(?:void|voyd|boyd|loyd|v\.o\.i\.d\.)[\s,:\.!-]*)/i;
+        const command = transcript.replace(wakePrefixRegex, '').trim();
+
+        if (command && command.length >= 3) {
+            if (this.elements.input) {
+                this.elements.input.value = command;
+            }
+            if (isFinal) {
+                setTimeout(() => {
+                    this.sendMessage();
+                    setTimeout(() => {
+                        if (this.elements.wakeWordIndicator) {
+                            this.elements.wakeWordIndicator.classList.remove('triggered');
+                            if (this.elements.wakeWordIndicatorText) {
+                                this.elements.wakeWordIndicatorText.textContent = 'Listening for "Hey VOID"';
+                            }
+                        }
+                    }, 1200);
+                }, 250);
+            }
+        } else {
+            // Standalone wake word ("Hey VOID")
+            if (this.elements.wakeWordIndicatorText) {
+                this.elements.wakeWordIndicatorText.textContent = '👂 V.O.I.D. is listening...';
+            }
+            if (this.elements.input) {
+                this.elements.input.focus();
+                this.elements.input.placeholder = "Listening... say your command";
+            }
+            setTimeout(() => {
+                if (this.elements.wakeWordIndicator) {
+                    this.elements.wakeWordIndicator.classList.remove('triggered');
+                    if (this.elements.wakeWordIndicatorText) {
+                        this.elements.wakeWordIndicatorText.textContent = 'Listening for "Hey VOID"';
+                    }
+                }
+                if (this.elements.input && this.elements.input.placeholder.includes("Listening")) {
+                    this.elements.input.placeholder = "Ask V.O.I.D. anything...";
+                }
+            }, 5000);
+        }
     }
 
     /* --- Claude Canvas / Artifacts Implementation --- */

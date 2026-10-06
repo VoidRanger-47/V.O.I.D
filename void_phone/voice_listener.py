@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import threading
 import time
@@ -153,13 +154,39 @@ class PhoneVoiceListener:
 
         return None
 
+    def extract_wake_command(self, transcript: str) -> tuple[bool, str]:
+        """
+        Detects wake word presence and strips the wake phrase from the command.
+        Supports 'Void', 'Hey Void', 'OK Void', 'V.O.I.D.', as well as common STT homophones (voyd, boyd).
+        Returns (is_wake, extracted_command).
+        """
+        if not transcript:
+            return False, ""
+
+        clean = transcript.strip()
+
+        # 1. Check if wake phrase is at the beginning
+        start_pattern = r"^(?:(?:hey|ok|okay|hello|hi|yo)\s+)?(?:v\.?\s*o\.?\s*i\.?\s*d\.?|void|voyd|boyd|lloyd)\b[\s,:\.!-]*"
+        match = re.search(start_pattern, clean, re.IGNORECASE)
+        if match:
+            cmd = clean[match.end():].strip(" ,.:;!?-\t\n")
+            return True, cmd
+
+        # 2. Check if wake phrase is elsewhere in the utterance
+        anywhere_pattern = r"\b(?:(?:hey|ok|okay|hello|hi|yo)\s+)?(?:v\.?\s*o\.?\s*i\.?\s*d\.?|void|voyd|boyd)\b"
+        if re.search(anywhere_pattern, clean, re.IGNORECASE):
+            cmd = re.sub(anywhere_pattern, "", clean, flags=re.IGNORECASE).strip(" ,.:;!?-\t\n")
+            cmd = re.sub(r"\s+", " ", cmd)
+            return True, cmd
+
+        return False, clean
+
     def run_continuous_loop(self):
         """
         Main continuous voice loop.
         Listens for wake words like 'Void', captures subsequent phone commands, and executes ADB actions.
         """
         self._running = True
-        wake_words = ["void", "hey void", "ok void", "hello void", "hey, void"]
 
         print(Fore.CYAN + Style.BRIGHT + """
         ====================================================
@@ -183,18 +210,11 @@ class PhoneVoiceListener:
                 if not transcript:
                     continue
 
-                lower = transcript.lower()
+                # Robust wake word detection and command extraction
+                is_wake, cmd_part = self.extract_wake_command(transcript)
 
-                # Check if wake word is present
-                is_wake = any(w in lower for w in wake_words)
                 if is_wake:
                     print(Fore.MAGENTA + f"\n⚡ Wake Word Detected: '{transcript}'")
-                    # Extract the command portion
-                    cmd_part = transcript
-                    for w in wake_words:
-                        if lower.startswith(w):
-                            cmd_part = transcript[len(w):].strip(", ")
-                            break
 
                     if not cmd_part or len(cmd_part) < 3:
                         # Wake word only, prompt user for command
@@ -205,7 +225,7 @@ class PhoneVoiceListener:
                     if cmd_part:
                         self.process_command_text(cmd_part)
                 else:
-                    # If direct command mode or high confidence phone action uttered
+                    # Direct command recognition if confidence is high
                     parsed = self.parser.parse(transcript)
                     if parsed.intent_type != IntentType.UNKNOWN and parsed.confidence >= 0.90:
                         print(Fore.BLUE + f"\nDirect Command Recognized: '{transcript}'")

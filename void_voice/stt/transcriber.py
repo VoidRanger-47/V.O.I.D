@@ -15,6 +15,7 @@ import io
 import os
 import time
 import threading
+from collections import deque
 import numpy as np
 import torch
 
@@ -42,8 +43,8 @@ _FRAME_DURATION = 0.030       # 30 ms frames for VAD
 _FRAME_SAMPLES  = int(_SAMPLE_RATE * _FRAME_DURATION)
 
 # Energy-based VAD thresholds
-_SILENCE_ENERGY  = 0.008      # frames below this are silence
-_SPEECH_ENERGY   = 0.018      # frames above this are speech
+_SILENCE_ENERGY  = 0.005      # frames below this are silence (calibrated for laptop mics)
+_SPEECH_ENERGY   = 0.010      # frames above this are speech (calibrated for natural speech)
 _SILENCE_FRAMES  = 25         # consecutive silence frames before ending capture (~750 ms)
 _MAX_RECORD_SEC  = 15         # hard cap
 
@@ -67,6 +68,7 @@ class _WASAPICapture:
         self._device       = device          # None = system default
         self._timeout      = timeout
         self._frames: list = []
+        self._preroll_buf  = deque(maxlen=8) # Keep ~240ms pre-speech audio
         self._lock         = threading.Lock()
         self._speech_started = False
         self._silence_count  = 0
@@ -82,9 +84,11 @@ class _WASAPICapture:
 
         with self._lock:
             if not self._speech_started:
+                self._preroll_buf.append(indata.copy())
                 if energy >= _SPEECH_ENERGY:
                     self._speech_started = True
-                    self._frames.append(indata.copy())
+                    # Prepend pre-roll buffer so the leading consonant/syllable (e.g. "V-") is not clipped
+                    self._frames.extend(list(self._preroll_buf))
             else:
                 self._frames.append(indata.copy())
                 if energy < _SILENCE_ENERGY:
@@ -210,7 +214,11 @@ class Ear:
         try:
             if not os.path.exists(file_path):
                 return "[Error: Audio file not found]"
-            segments, _ = self.model.transcribe(file_path, beam_size=3)
+            segments, _ = self.model.transcribe(
+                file_path,
+                beam_size=3,
+                initial_prompt="Hey VOID, VOID, phone assistant, unlock phone, open app."
+            )
             text = "".join(seg.text for seg in segments).strip()
             return text if text else "[inaudible]"
         except Exception as e:
@@ -261,7 +269,11 @@ class Ear:
                 return ""
 
             wav_buf = _pcm_to_wav_bytes(pcm, _SAMPLE_RATE)
-            segments, _ = self.model.transcribe(wav_buf, beam_size=3)
+            segments, _ = self.model.transcribe(
+                wav_buf,
+                beam_size=3,
+                initial_prompt="Hey VOID, VOID, phone assistant, unlock phone, open app."
+            )
             text = "".join(seg.text for seg in segments).strip()
             return text if text else "[inaudible]"
 

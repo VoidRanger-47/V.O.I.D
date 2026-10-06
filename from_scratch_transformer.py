@@ -222,35 +222,12 @@ if not text.strip():
 
 
 # -------------------------
-# GPT-Style Tokenizer (cl100k_base) with offline fallback
+# OpenAI o200k_base Tokenizer (pure tiktoken)
 # -------------------------
-class GPTTokenizer:
-    def __init__(self, model_name="cl100k_base"):
-        try:
-            self.enc = tiktoken.get_encoding(model_name)
-            self.vocab_size = self.enc.n_vocab
-            self.offline_mode = False
-        except Exception as e:
-            print(f"⚠️ Could not load tiktoken ({type(e).__name__}), using offline character tokenizer")
-            self.enc = None
-            self.vocab_size = 256  # ASCII range + special tokens
-            self.offline_mode = True
+from core.tokenizer import TiktokenTokenizer, tokenizer as core_tokenizer
 
-    def encode(self, text):
-        if self.offline_mode:
-            # Character-level encoding
-            return [ord(c) for c in text] + [0]  # 0 = end of text token
-        else:
-            return self.enc.encode(text, allowed_special={"<|endoftext|>"})
-
-    def decode(self, ids):
-        if self.offline_mode:
-            # Character-level decoding
-            return "".join(chr(i) for i in ids if i > 0 and i < 256)
-        else:
-            return self.enc.decode(ids)
-
-tokenizer = GPTTokenizer("cl100k_base")
+GPTTokenizer = TiktokenTokenizer
+tokenizer = TiktokenTokenizer("o200k_base")
 data = torch.tensor(tokenizer.encode(text), dtype=torch.long)
 print(f"Vocab size: {tokenizer.vocab_size}")
 
@@ -624,7 +601,7 @@ def validate_checkpoint(ckpt_data, expected_vocab_size, expected_config=None):
     model_state = ckpt_data["model"]
     if "token_emb.weight" in model_state:
         ckpt_vocab_size = model_state["token_emb.weight"].shape[0]
-        if ckpt_vocab_size != expected_vocab_size:
+        if ckpt_vocab_size > expected_vocab_size:
             raise ValueError(f"Vocab size mismatch: checkpoint has {ckpt_vocab_size}, expected {expected_vocab_size}")
     
     # Check for required model keys
@@ -646,9 +623,25 @@ if os.path.exists(args.checkpoint):
         validate_checkpoint(ckpt, tokenizer.vocab_size)
         
         state = ckpt.get("model", ckpt) if isinstance(ckpt, dict) else ckpt
-        model.load_state_dict(state)
+
+        # Adapt embedding and head weights if checkpoint vocabulary was smaller
+        cur_vocab = model.token_emb.weight.shape[0]
+        if "token_emb.weight" in state and state["token_emb.weight"].shape[0] < cur_vocab:
+            old_vocab = state["token_emb.weight"].shape[0]
+            print(f"ℹ️ Adapting checkpoint embeddings from {old_vocab} to {cur_vocab} for o200k_base")
+            for weight_key in ["token_emb.weight", "head.weight"]:
+                if weight_key in state:
+                    expanded = model.state_dict()[weight_key].clone()
+                    expanded[:old_vocab, :] = state[weight_key]
+                    state[weight_key] = expanded
+
+        model.load_state_dict(state, strict=False)
         if isinstance(ckpt, dict) and "optim" in ckpt:
-            optimizer.load_state_dict(ckpt["optim"])
+            # Optimizer state is skipped if vocab size changed to avoid shape mismatch
+            try:
+                optimizer.load_state_dict(ckpt["optim"])
+            except Exception as opt_err:
+                print(f"ℹ️ Reset optimizer state for new vocabulary: {opt_err}")
             start_step = ckpt.get("step", 0) + 1
         print(f"Resuming from step {start_step}")
     except Exception as e:

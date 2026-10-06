@@ -28,4 +28,16 @@ if (fs.existsSync(visionSrc)) {
   fs.copyFileSync(visionSrc, path.join(publicDir, 'vision.html'));
 }
 
+// 5. Copy Flutter Studio build to public/studio if present
+const studioBuildSrc = path.join(rootDir, 'void_studio', 'build', 'web');
+const studioDest = path.join(publicDir, 'studio');
+if (fs.existsSync(studioBuildSrc)) {
+  if (fs.existsSync(studioDest)) {
+    fs.rmSync(studioDest, { recursive: true, force: true });
+  }
+  fs.cpSync(studioBuildSrc, studioDest, { recursive: true });
+  console.log('✓ V.O.I.D. Studio Flutter web bundle copied to public/studio/');
+}
+
 console.log('✓ V.O.I.D. public assets generated successfully in public/');
+

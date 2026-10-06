@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file, Response, stream_with_context
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory, Response, stream_with_context
 from chat import (
     route_query, void_mem, tokenizer, model, args, device,
     get_coding_persona, format_code_response, generate_stream_tokens, AVAILABLE_TOOLS,
@@ -134,6 +134,18 @@ def api_health():
 @app.route("/")
 def index():
     return render_template("chat.html")
+
+@app.route("/studio")
+@app.route("/studio/")
+@app.route("/studio/<path:path>")
+def studio_page(path=None):
+    """Dedicated V.O.I.D. Studio Cockpit IDE & Neural Observatory webpage."""
+    studio_dir = os.path.join(os.path.dirname(__file__), "public", "studio")
+    if not os.path.exists(studio_dir):
+        studio_dir = os.path.join(os.path.dirname(__file__), "void_studio", "build", "web")
+    if path and os.path.exists(os.path.join(studio_dir, path)):
+        return send_from_directory(studio_dir, path)
+    return send_from_directory(studio_dir, "index.html")
 
 @app.route("/vision")
 def vision_page():

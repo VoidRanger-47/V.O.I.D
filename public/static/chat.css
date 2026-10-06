@@ -1828,6 +1828,78 @@ code {
     50% { opacity: 0.6; }
 }
 
+/* --- Wake Word Styling --- */
+.wake-word-btn {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+}
+
+.wake-word-btn.active {
+    color: var(--accent-color, #70a5ff) !important;
+    background: rgba(112, 165, 255, 0.15) !important;
+    border-color: rgba(112, 165, 255, 0.4) !important;
+    box-shadow: 0 0 10px rgba(112, 165, 255, 0.25);
+}
+
+.wake-word-btn.active::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 6px #00ff88;
+    animation: wake-pulse 1.8s infinite;
+}
+
+@keyframes wake-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.8); }
+}
+
+.wake-word-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    background: rgba(0, 255, 136, 0.08);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 20px;
+    color: #00ff88;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    align-self: center;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.25s ease;
+    animation: fadeIn 0.3s ease;
+}
+
+.wake-word-indicator.triggered {
+    background: rgba(255, 180, 0, 0.2);
+    border-color: rgba(255, 180, 0, 0.8);
+    color: #ffb400;
+    box-shadow: 0 0 14px rgba(255, 180, 0, 0.45);
+    transform: scale(1.03);
+}
+
+.wake-word-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 8px #00ff88;
+    animation: wake-pulse 1.5s infinite;
+}
+
+.wake-word-indicator.triggered .wake-word-dot {
+    background: #ffb400;
+    box-shadow: 0 0 8px #ffb400;
+}
+
 .voice-status {
     padding: 8px 12px;
     background: rgba(255, 68, 68, 0.1);

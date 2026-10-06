@@ -7,7 +7,9 @@
     { "source": "/", "destination": "/index.html" },
     { "source": "/chat", "destination": "/index.html" },
     { "source": "/vision", "destination": "/templates/vision.html" },
-    { "source": "/voice-test", "destination": "/templates/voice_test.html" }
+    { "source": "/voice-test", "destination": "/templates/voice_test.html" },
+    { "source": "/studio", "destination": "/studio/index.html" },
+    { "source": "/studio/", "destination": "/studio/index.html" }
   ],
   "headers": [
     {

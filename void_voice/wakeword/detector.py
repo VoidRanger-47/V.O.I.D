@@ -11,8 +11,8 @@ class WakeWordEngine:
     def __init__(self, config):
         self.config = config
         self.wake_phrase = config.get("wake_word", "hey_void").lower().replace("_", " ")
-        self.threshold = float(config.get("wake_threshold", 800))
-        self.buffer_size = int(config.get("wakeword_buffer", 8))
+        self.threshold = float(config.get("wake_threshold", 250))
+        self.buffer_size = int(config.get("wakeword_buffer", 10))
         self.energy_buffer = deque(maxlen=self.buffer_size)
         self.zcr_buffer = deque(maxlen=self.buffer_size)
         self.triggered = False
@@ -35,13 +35,15 @@ class WakeWordEngine:
             self.zcr_buffer.append(zcr)
 
             if len(self.energy_buffer) >= 3:
-                baseline_energy = np.median(list(self.energy_buffer)[:-1])
+                baseline_energy = float(np.median(list(self.energy_buffer)[:-1]))
                 curr_energy = self.energy_buffer[-1]
                 curr_zcr = self.zcr_buffer[-1]
 
-                # Speech acoustic envelope: sustained energy spike above ambient baseline + valid speech ZCR range
-                is_voice_energy = (curr_energy > self.threshold) and (curr_energy > baseline_energy * 1.8)
-                is_speech_spectrum = 0.04 < curr_zcr < 0.45
+                # Adaptive speech acoustic envelope:
+                # Triggers when energy rises significantly above ambient baseline or crosses calibrated threshold
+                # while within human vocal zero-crossing rate spectrum (0.02 - 0.48)
+                is_voice_energy = (curr_energy > self.threshold and curr_energy > baseline_energy * 1.5) or (curr_energy > max(200.0, baseline_energy * 2.2))
+                is_speech_spectrum = 0.02 < curr_zcr < 0.48
 
                 if is_voice_energy and is_speech_spectrum:
                     self.triggered = True

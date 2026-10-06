@@ -1,6 +1,6 @@
 {
     "wake_word": "hey_void",
-    "wake_threshold": 800.0,
+    "wake_threshold": 250.0,
     "mic_index": null,
     "sample_rate": 16000,
     "chunk_size": 1280,
