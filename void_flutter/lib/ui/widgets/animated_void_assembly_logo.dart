@@ -12,7 +12,7 @@ import '../../core/constants/app_colors.dart';
 /// - Quantum Core (`void_part_core.png`): Zooms from z-depth with spinning momentum into cavity
 /// - Golden Halo (`void_part_halo.png`): Sweeps from outer orbit, clamping the wings
 /// - Top Bar (`void_part_top.png`): Slam-locks from above, completing the emblem
-/// - Lock-in Flash & Shockwaves: Dual-ring energy ripples and mechanical recoil bounce
+/// - Lock-in Flash & Shockwaves: Dual-ring energy ripples with clean, firm lock-in (no bounce)
 class AnimatedVoidAssemblyLogo extends StatelessWidget {
   final Animation<double> animation;
   final double size;
@@ -34,26 +34,21 @@ class AnimatedVoidAssemblyLogo extends StatelessWidget {
       builder: (context, child) {
         final t = animation.value;
 
-        // Mechanical recoil settle bounce on lock-in (0.78 to 1.0)
-        double recoilScale = 1.0;
-        if (t >= 0.78) {
-          final p = (t - 0.78) / 0.22;
-          // Spring overshoot bounce
-          recoilScale = 1.0 + math.sin(p * math.pi) * 0.08 * math.exp(-p * 2.5);
-        }
+        // Smooth lock-in without bounce or overshoot recoil
+        const double recoilScale = 1.0;
 
-        // Staggered intervals with weighted physics curves:
+        // Staggered intervals with smooth physics curves (no bounce):
         // 1. Initial Singularity Core Glow (0.00 -> 0.25)
         final tSpark = _interval(t, 0.00, 0.25, Curves.easeOut);
         // 2. Wings Entry (Left: 0.12 -> 0.55, Right: 0.18 -> 0.58)
         final tLeft = _interval(t, 0.12, 0.55, Curves.easeOutCubic);
         final tRight = _interval(t, 0.18, 0.58, Curves.easeOutCubic);
         // 3. Core Triangle Insertion (0.30 -> 0.65)
-        final tCore = _interval(t, 0.30, 0.65, Curves.easeOutBack);
+        final tCore = _interval(t, 0.30, 0.65, Curves.easeOutCubic);
         // 4. Gold Orbital Halo (0.45 -> 0.74)
         final tHalo = _interval(t, 0.45, 0.74, Curves.easeOutCubic);
         // 5. Top Bar Clamp (0.55 -> 0.79)
-        final tTop = _interval(t, 0.55, 0.79, Curves.easeOutBack);
+        final tTop = _interval(t, 0.55, 0.79, Curves.easeOutCubic);
         // 6. Impact Lock-In & Shockwave (0.78 -> 1.00)
         final tLock = _interval(t, 0.78, 1.00, Curves.easeOutQuad);
         // 7. Background Squircle Reveal (fades in as parts assemble, 0.40 -> 0.80)

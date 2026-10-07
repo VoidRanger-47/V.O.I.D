@@ -3,33 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f0f11">
     <title>V.O.I.D. Voice Diagnostics</title>
     <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
     <link rel="alternate icon" type="image/png" href="/static/favicon.png">
     <style>
         * { box-sizing: border-box; }
         body {
-            font-family: 'Inter', monospace;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             max-width: 900px;
             margin: 40px auto;
             padding: 20px;
-            background: #121316;
-            color: #E3E3E3;
+            background: #0f0f11;
+            color: #f0eeeb;
         }
-        h1 { color: #FF5500; display: flex; align-items: center; gap: 12px; }
+        h1 { color: #ff5500; display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: 0.5px; }
         h1 img { width: 36px; height: 36px; }
+        h2 { color: #f0eeeb; font-size: 1.15rem; margin-top: 0; }
         .section {
-            background: #191A1F;
-            border: 1px solid #2E303A;
+            background: #171719;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
         }
         .test-item {
-            padding: 10px;
+            padding: 12px 14px;
             margin: 10px 0;
-            background: #202127;
-            border-left: 3px solid #FF5500;
+            background: #18181c;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-left: 3px solid #ff5500;
             border-radius: 4px;
         }
         .status {
@@ -39,32 +42,33 @@
             font-weight: bold;
             font-size: 12px;
         }
-        .status.success { background: #4CAF50; color: white; }
-        .status.error { background: #f44336; color: white; }
-        .status.pending { background: #FF9800; color: white; }
+        .status.success { background: #22c55e; color: #0f0f11; font-weight: 700; }
+        .status.error { background: #ef4444; color: #ffffff; }
+        .status.pending { background: #ffaa00; color: #0f0f11; font-weight: 700; }
         button {
-            background: #A8C7FA;
-            color: #131314;
+            background: #ff5500;
+            color: #0f0f11;
             border: none;
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 700;
             margin: 10px 5px 10px 0;
+            transition: background 0.15s ease;
         }
-        button:hover { background: #87B5FF; }
-        button:disabled { background: #666; cursor: not-allowed; }
+        button:hover { background: #ff6a1a; }
+        button:disabled { background: #333338; color: #888888; cursor: not-allowed; }
         #output {
-            background: #0a0a0a;
-            border: 1px solid #666;
+            background: #09090b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             padding: 15px;
-            font-family: monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
             max-height: 400px;
             overflow-y: auto;
             margin-top: 10px;
-            color: #0F0;
+            color: #22c55e;
         }
         .log-line {
             margin: 4px 0;
@@ -73,7 +77,7 @@
     </style>
 </head>
 <body>
-    <h1>🎤 V.O.I.D. Voice Diagnostics</h1>
+    <h1><img src="/static/icon.svg" alt="V.O.I.D."> V.O.I.D. Voice Diagnostics</h1>
     
     <div class="section">
         <h2>1️⃣ Browser Capabilities</h2>

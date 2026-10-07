@@ -49,7 +49,7 @@ class ChatBubble extends StatelessWidget {
               height: 28,
               decoration: BoxDecoration(
                 color: AppColors.surfaceContainer,
-                borderRadius: BorderRadius.circular(8),
+                shape: BoxShape.circle,
                 border: Border.all(color: AppColors.borderHairline, width: 1),
               ),
               child: const Center(
@@ -74,7 +74,7 @@ class ChatBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.borderHairline, width: 1.0),
       ),
       child: Column(
@@ -103,7 +103,7 @@ class ChatBubble extends StatelessWidget {
                 const SizedBox(width: 8),
                 InkWell(
                   onTap: onDelete,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(8),
                   child: const Padding(
                     padding: EdgeInsets.all(2),
                     child: Icon(
@@ -134,7 +134,7 @@ class ChatBubble extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
               color: AppColors.accentSubtle,
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: AppColors.accent.withOpacity(0.3),
                 width: 1,
@@ -196,12 +196,12 @@ class ChatBubble extends StatelessWidget {
                   ),
                 );
               },
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceContainer,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.borderHairline, width: 1),
                 ),
                 child: const Row(
@@ -229,12 +229,12 @@ class ChatBubble extends StatelessWidget {
                       ),
                     );
                   },
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.accentSubtle,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: AppColors.accent.withOpacity(0.3),
                     width: 1,
@@ -262,12 +262,12 @@ class ChatBubble extends StatelessWidget {
               // Delete individual message action
               InkWell(
                 onTap: onDelete,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     color: AppColors.surfaceContainer,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: AppColors.borderHairline, width: 1),
                   ),
                   child: const Icon(
@@ -307,7 +307,7 @@ class ChatBubble extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
               color: AppColors.bgApp,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(color: AppColors.borderHairline, width: 1.0),
             ),
             child: Column(
@@ -318,8 +318,8 @@ class ChatBubble extends StatelessWidget {
                   decoration: const BoxDecoration(
                     color: AppColors.surfaceContainer,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(7),
-                      topRight: Radius.circular(7),
+                      topLeft: Radius.circular(13),
+                      topRight: Radius.circular(13),
                     ),
                     border: Border(
                       bottom: BorderSide(color: AppColors.borderHairline, width: 1),

@@ -55,10 +55,10 @@ class _SystemRailState extends State<SystemRail> {
               bottom: BorderSide(color: VoidTokens.voidSurfaceBorder, width: 1.0),
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          padding: EdgeInsets.symmetric(horizontal: width < 380 ? 6.0 : 12.0),
           child: Row(
             children: [
-              // V.O.I.D. Studio Brand Mark
+              // V.O.I.D. Main Logo & Studio Identity Mark
               InkWell(
                 onTap: () => state.setActiveMode(WorkspaceMode.core),
                 borderRadius: BorderRadius.circular(4),
@@ -67,26 +67,49 @@ class _SystemRailState extends State<SystemRail> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 9,
-                        height: 9,
-                        decoration: BoxDecoration(
-                          color: state.isBackendConnected
-                              ? VoidTokens.statusGreen
-                              : VoidTokens.voidOrange,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: state.isBackendConnected
-                                  ? VoidTokens.statusGreenGlow
-                                  : VoidTokens.voidOrangeGlow,
-                              blurRadius: 6,
-                              spreadRadius: 1,
+                      // Official V.O.I.D. Main Emblem Logo
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.asset(
+                          'assets/images/void_symbol.png',
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 20,
+                            height: 20,
+                            decoration: const BoxDecoration(
+                              color: VoidTokens.voidOrange,
+                              shape: BoxShape.circle,
                             ),
-                          ],
+                            child: const Icon(Icons.blur_on, size: 14, color: VoidTokens.voidBlack),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      if (width >= 360) ...[
+                        const SizedBox(width: 8),
+                        // Core Connectivity Glow Dot
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: state.isBackendConnected
+                                ? VoidTokens.statusGreen
+                                : VoidTokens.voidOrange,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: state.isBackendConnected
+                                    ? VoidTokens.statusGreenGlow
+                                    : VoidTokens.voidOrangeGlow,
+                                blurRadius: 5,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 7),
                       Text(
                         'V.O.I.D.',
                         style: VoidTheme.hudLabel(
@@ -114,6 +137,17 @@ class _SystemRailState extends State<SystemRail> {
                             ),
                           ),
                         ),
+                        if (width >= 980) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            '// NEURAL COCKPIT',
+                            style: VoidTheme.mono(
+                              fontSize: 8.5,
+                              color: VoidTokens.textMuted,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
                       ],
                     ],
                   ),
@@ -161,7 +195,7 @@ class _SystemRailState extends State<SystemRail> {
                 const SizedBox(width: 10),
                 _buildQuickStat('SYNC', '${state.metrics.stability.toStringAsFixed(1)}%'),
                 const SizedBox(width: 14),
-              ] else if (width >= 780) ...[
+              ] else if (width >= 860) ...[
                 _buildQuickStat('CPU', '${state.metrics.cpuPercent.toStringAsFixed(0)}%'),
                 const SizedBox(width: 8),
                 _buildQuickStat('GPU', '${state.metrics.gpuPercent.toStringAsFixed(0)}%'),
@@ -173,10 +207,7 @@ class _SystemRailState extends State<SystemRail> {
                 onTap: () => state.openCommandPalette(),
                 borderRadius: BorderRadius.circular(4),
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isVeryNarrow ? 6 : 8,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                   decoration: BoxDecoration(
                     color: VoidTokens.voidSurface,
                     borderRadius: BorderRadius.circular(4),
@@ -186,10 +217,20 @@ class _SystemRailState extends State<SystemRail> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(Icons.terminal, size: 13, color: VoidTokens.voidOrangeBright),
-                      if (!isVeryNarrow) ...[
+                      if (width >= 960) ...[
                         const SizedBox(width: 5),
                         Text(
-                          width >= 960 ? 'COMMAND [CTRL+SPACE]' : 'CMD',
+                          'COMMAND [CTRL+SPACE]',
+                          style: VoidTheme.mono(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: VoidTokens.voidOrangeBright,
+                          ),
+                        ),
+                      ] else if (width >= 640) ...[
+                        const SizedBox(width: 5),
+                        Text(
+                          'CMD',
                           style: VoidTheme.mono(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
@@ -201,10 +242,10 @@ class _SystemRailState extends State<SystemRail> {
                   ),
                 ),
               ),
+              const SizedBox(width: 6),
 
               // System Clock (hidden on very compact screens)
               if (width >= 620) ...[
-                const SizedBox(width: 12),
                 Text(
                   _currentTime,
                   style: VoidTheme.mono(
@@ -213,53 +254,77 @@ class _SystemRailState extends State<SystemRail> {
                     color: VoidTokens.textMuted,
                   ),
                 ),
+                const SizedBox(width: 10),
               ],
 
-              const SizedBox(width: 10),
-
-              // Toggle Performance Mode
-              IconButton(
-                icon: Icon(
-                  state.performanceMode ? Icons.speed : Icons.auto_awesome,
-                  size: 15,
-                  color: state.performanceMode ? VoidTokens.statusYellow : VoidTokens.voidOrange,
+              // Toggle Performance Mode (hide on ultra-compact screens)
+              if (width >= 360) ...[
+                IconButton(
+                  icon: Icon(
+                    state.performanceMode ? Icons.speed : Icons.auto_awesome,
+                    size: 15,
+                    color: state.performanceMode ? VoidTokens.statusYellow : VoidTokens.voidOrange,
+                  ),
+                  tooltip: state.performanceMode
+                      ? 'Performance Mode Active (Low GPU)'
+                      : 'Full Holographic HUD Active',
+                  onPressed: () => state.togglePerformanceMode(),
+                  padding: const EdgeInsets.all(6),
+                  constraints: const BoxConstraints(),
                 ),
-                tooltip: state.performanceMode
-                    ? 'Performance Mode Active (Low GPU)'
-                    : 'Full Holographic HUD Active',
-                onPressed: () => state.togglePerformanceMode(),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(),
-              ),
+                const SizedBox(width: 6),
+              ],
 
-              const SizedBox(width: 6),
-
-              // Toggle Telemetry Drawer
-              IconButton(
-                icon: Icon(
-                  Icons.analytics_outlined,
-                  size: 15,
-                  color: state.telemetryDrawerOpen ? VoidTokens.voidOrange : VoidTokens.textMuted,
+              // Toggle Telemetry Drawer (hide on compact mobile screens)
+              if (width >= 400) ...[
+                IconButton(
+                  icon: Icon(
+                    Icons.analytics_outlined,
+                    size: 15,
+                    color: state.telemetryDrawerOpen ? VoidTokens.voidOrange : VoidTokens.textMuted,
+                  ),
+                  tooltip: 'Toggle Telemetry Stream',
+                  onPressed: () => state.toggleTelemetryDrawer(),
+                  padding: const EdgeInsets.all(6),
+                  constraints: const BoxConstraints(),
                 ),
-                tooltip: 'Toggle Telemetry Stream',
-                onPressed: () => state.toggleTelemetryDrawer(),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(),
-              ),
-
-              const SizedBox(width: 6),
+                const SizedBox(width: 6),
+              ],
 
               // Return to V.O.I.D. Chat Main Page
-              IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_rounded,
-                  size: 15,
-                  color: VoidTokens.voidOrangeBright,
+              InkWell(
+                onTap: () => navigateToVoidChat(),
+                borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: isVeryNarrow ? 5 : 7, vertical: 3.5),
+                  decoration: BoxDecoration(
+                    color: VoidTokens.voidOrange.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: VoidTokens.voidOrange.withOpacity(0.35)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.arrow_back_rounded,
+                        size: 13,
+                        color: VoidTokens.voidOrangeBright,
+                      ),
+                      if (width >= 860) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          'MAIN CHAT',
+                          style: VoidTheme.mono(
+                            fontSize: 9.5,
+                            fontWeight: FontWeight.w700,
+                            color: VoidTokens.voidOrangeBright,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                tooltip: 'Return to V.O.I.D. Chat (/)',
-                onPressed: () => navigateToVoidChat(),
-                padding: const EdgeInsets.all(6),
-                constraints: const BoxConstraints(),
               ),
             ],
           ),

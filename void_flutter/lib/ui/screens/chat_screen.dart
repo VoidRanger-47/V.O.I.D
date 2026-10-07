@@ -116,10 +116,35 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add, size: 20, color: AppColors.textPrimary),
-            tooltip: 'New Conversation',
-            onPressed: () => chatProvider.newSession(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            child: InkWell(
+              onTap: () => chatProvider.newSession(),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainer,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.borderHairline, width: 1),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.add_rounded, size: 16, color: AppColors.accent),
+                    const SizedBox(width: 4),
+                    Text(
+                      'New',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: 4),
         ],
@@ -200,7 +225,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: AppColors.surfaceContainer,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.borderHairline, width: 1.0),
             ),
             child: Row(
@@ -227,7 +252,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     foregroundColor: AppColors.bgApp,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     elevation: 0,
                   ),
@@ -285,12 +310,12 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   Widget _buildSuggestionChip(String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
         decoration: BoxDecoration(
           color: AppColors.surfaceContainer,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.borderHairline, width: 1.0),
         ),
         child: Text(
@@ -321,7 +346,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
               color: AppColors.surfaceContainer,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.borderHairline, width: 1.0),
             ),
             child: Row(
@@ -366,7 +391,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: AppColors.accentSubtle,
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: AppColors.accent.withOpacity(0.3)),
               ),
               child: Row(
@@ -393,7 +418,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.surfaceContainer,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(22),
               border: Border.all(
                 color: _textController.text.isNotEmpty ? AppColors.accent : AppColors.borderHairline,
                 width: 1.0,
@@ -475,13 +500,13 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                       ),
                     ),
                     const SizedBox(width: 4),
-                    // Sharp Primary Send Button (0xFFDA7756 filled, 0xFF0D0D0D icon, 8px radius)
+                    // Smooth Primary Send Button
                     Container(
                       width: 32,
                       height: 32,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppColors.accent,
-                        borderRadius: BorderRadius.circular(8),
+                        shape: BoxShape.circle,
                       ),
                       child: IconButton(
                         icon: const Icon(Icons.arrow_upward, color: AppColors.bgApp, size: 18),
@@ -519,13 +544,13 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(14),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
         decoration: BoxDecoration(
           color: isActive ? AppColors.accentSubtle : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isActive ? AppColors.accent : AppColors.borderHairline,
             width: 1.0,

@@ -28,7 +28,7 @@ class TelemetryGauge extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.surfaceContainer,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderHairline, width: 1.0),
       ),
       child: Column(
@@ -66,7 +66,7 @@ class TelemetryGauge extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           ClipRRect(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: clamped,
               backgroundColor: AppColors.bgApp,

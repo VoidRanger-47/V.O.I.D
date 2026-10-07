@@ -79,10 +79,21 @@ class _VoidCoreViewState extends State<VoidCoreView> with SingleTickerProviderSt
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: Image.asset(
+                                      'assets/images/void_symbol.png',
+                                      width: reactorSize < 200 ? 30 : 42,
+                                      height: reactorSize < 200 ? 30 : 42,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
                                   Text(
                                     'CORE MK-IV',
                                     style: VoidTheme.hudLabel(
-                                      fontSize: reactorSize < 200 ? 11 : 13,
+                                      fontSize: reactorSize < 200 ? 10.5 : 12,
                                       letterSpacing: 2.0,
                                       color: _getStateColor(state.coreState),
                                     ),
@@ -160,6 +171,94 @@ class _VoidCoreViewState extends State<VoidCoreView> with SingleTickerProviderSt
                             ),
                           );
                         }).toList(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // Studio Operational Purpose & Missions Overview
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 720),
+                      child: HudPanel(
+                        technicalTag: 'SYS.STUDIO_MISSION // COCKPIT PURPOSE',
+                        backgroundColor: VoidTokens.voidObsidian,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Image.asset(
+                                    'assets/images/void_symbol.png',
+                                    width: 20,
+                                    height: 20,
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const Icon(Icons.blur_on, size: 18, color: VoidTokens.voidOrange),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'V.O.I.D. STUDIO PURPOSE & OPERATIONS BRIEFING',
+                                    style: VoidTheme.hudLabel(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: VoidTokens.voidOrangeBright,
+                                      letterSpacing: 1.0,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'V.O.I.D. Studio MK-IV is the autonomous engineering cockpit and neural observatory of the V.O.I.D. Cognitive Operating System. It provides a specialized multi-panel environment for executing code workflows, directing autonomous subagents, monitoring neural inference rates, exploring vector memories, and analyzing live vision streams.',
+                              style: VoidTheme.mono(
+                                fontSize: 10.5,
+                                color: VoidTokens.textHigh,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                _buildPurposeChip(
+                                  icon: Icons.code,
+                                  title: 'CODE STUDIO',
+                                  desc: 'Spatial IDE & File Tree',
+                                  onTap: () => state.setActiveMode(WorkspaceMode.code),
+                                ),
+                                _buildPurposeChip(
+                                  icon: Icons.hub_outlined,
+                                  title: 'AGENT MESH',
+                                  desc: 'Autonomous Orchestration',
+                                  onTap: () => state.setActiveMode(WorkspaceMode.agents),
+                                ),
+                                _buildPurposeChip(
+                                  icon: Icons.memory,
+                                  title: 'MEMORY OBSERVATORY',
+                                  desc: 'Vector & Recall Graph',
+                                  onTap: () => state.setActiveMode(WorkspaceMode.memory),
+                                ),
+                                _buildPurposeChip(
+                                  icon: Icons.show_chart,
+                                  title: 'NEURAL MONITORS',
+                                  desc: 'Loss & Token Throughput',
+                                  onTap: () => state.setActiveMode(WorkspaceMode.models),
+                                ),
+                                _buildPurposeChip(
+                                  icon: Icons.visibility,
+                                  title: 'VISION HUD',
+                                  desc: 'Optical Perception Feeds',
+                                  onTap: () => state.setActiveMode(WorkspaceMode.vision),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -245,6 +344,51 @@ class _VoidCoreViewState extends State<VoidCoreView> with SingleTickerProviderSt
           const SizedBox(height: 2),
           Text('2,048 / 8,192 TOKENS', style: VoidTheme.mono(fontSize: 10.5, color: VoidTokens.textHigh)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPurposeChip({
+    required IconData icon,
+    required String title,
+    required String desc,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+        decoration: BoxDecoration(
+          color: VoidTokens.voidSurface,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: VoidTokens.voidSurfaceBorder),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: VoidTokens.voidOrange),
+            const SizedBox(width: 7),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: VoidTheme.hudLabel(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w700,
+                    color: VoidTokens.voidOrangeBright,
+                  ),
+                ),
+                Text(
+                  desc,
+                  style: VoidTheme.mono(fontSize: 8.5, color: VoidTokens.textMuted),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

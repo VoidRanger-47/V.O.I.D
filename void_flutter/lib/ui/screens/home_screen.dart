@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
           elevation: 0,
           type: BottomNavigationBarType.fixed,
           selectedItemColor: AppColors.accent,
-          unselectedItemColor: AppColors.textSecondary,
+          unselectedItemColor: AppColors.textMuted,
           selectedLabelStyle: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600),
           unselectedLabelStyle: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w400),
           currentIndex: _currentIndex > 4 ? 4 : _currentIndex,
@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 20),
+                    icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                     onPressed: () => Navigator.pop(context),
@@ -142,9 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // "+ New Conversation" Button
+            // "+ New Conversation" Button — Smooth rounded pill
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               child: InkWell(
                 onTap: () {
                   chatProvider.newSession();
@@ -153,24 +153,43 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                   Navigator.pop(context);
                 },
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(24),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(8),
+                    color: AppColors.surfaceContainer,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: AppColors.accent.withOpacity(0.35),
+                      width: 1.0,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accent.withOpacity(0.06),
+                        blurRadius: 10,
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.add, size: 16, color: AppColors.bgApp),
-                      const SizedBox(width: 8),
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withOpacity(0.16),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.add_rounded, size: 15, color: AppColors.accent),
+                      ),
+                      const SizedBox(width: 10),
                       Text(
                         'NEW CONVERSATION',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.bgApp,
+                          color: AppColors.textPrimary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -186,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 'RECENT CONVERSATIONS',
                 style: GoogleFonts.jetBrainsMono(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textMuted,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
@@ -201,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? Center(
                       child: Text(
                         'No previous chats',
-                        style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
+                        style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 12),
                       ),
                     )
                   : ListView.builder(
@@ -212,17 +231,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         final isSelected = session.id == chatProvider.currentSessionId && _currentIndex == 0;
 
                         return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 2),
+                          margin: const EdgeInsets.symmetric(vertical: 3),
                           decoration: BoxDecoration(
                             color: isSelected ? AppColors.accentSubtle : AppColors.surfaceContainer,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: isSelected ? AppColors.accent : AppColors.borderHairline,
+                              color: isSelected ? AppColors.accent.withOpacity(0.6) : AppColors.borderHairline,
                               width: 1.0,
                             ),
                           ),
                           child: InkWell(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(14),
                             onTap: () {
                               chatProvider.switchSession(session.id);
                               setState(() {
@@ -387,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(18),
           side: const BorderSide(color: AppColors.borderHairline, width: 1),
         ),
         title: Text(
@@ -420,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> {
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
             onPressed: () {
@@ -454,7 +473,7 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(
         color: isActive ? AppColors.surfaceContainer : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(14),
         border: isActive
             ? Border.all(color: AppColors.borderHairline, width: 1)
             : null,

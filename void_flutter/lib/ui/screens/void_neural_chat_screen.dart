@@ -18,10 +18,10 @@ class _NC {
   static const surface       = Color(0xFF1E1E1E); // containers / chips
   static const orange        = Color(0xFFFF5F15); // primary accent
   static const white         = Color(0xFFFFFFFF); // primary text
-  static const grey          = Color(0xFF9CA3AF); // secondary text/icons
+  static const grey          = Color(0xFF9E9EA4); // secondary text/icons
   static const neonGreen     = Color(0xFF22C55E); // active status dot
   static const borderThin    = Color(0xFF2A2A2A); // default borders
-  static const avatarBg      = orange;
+  static const avatarBg      = Color(0xFF242428); // subtle user avatar
 }
 
 /// Full-screen V.O.I.D. Neural Chat interface.
@@ -179,7 +179,7 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
         backgroundColor: _NC.surface,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: _NC.borderThin),
         ),
         duration: const Duration(seconds: 3),
@@ -206,7 +206,7 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
         backgroundColor: _NC.surface,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: _NC.borderThin),
         ),
         duration: const Duration(seconds: 3),
@@ -258,7 +258,7 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
         backgroundColor: _NC.surface,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: _NC.borderThin),
         ),
         duration: const Duration(seconds: 2),
@@ -349,10 +349,43 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
           // ── Center title (Interactive Model Selector) ───────────────────
           title: _buildAppBarCenter(settings),
           centerTitle: true,
-          // ── Right avatar ───────────────────────────────────────────────
-          actions: const [
+          // ── Right: Smooth New Chat Button & Avatar ─────────────────────
+          actions: [
             Padding(
-              padding: EdgeInsets.only(right: 14),
+              padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 4),
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  chat.newSession();
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _NC.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: _NC.borderThin, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.add_rounded, color: _NC.white, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        'New',
+                        style: GoogleFonts.inter(
+                          color: _NC.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(right: 14, left: 4),
               child: _UserAvatar(initial: 'A'),
             ),
           ],
@@ -633,7 +666,7 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: isSelected ? _NC.orange : const Color(0xFF262626),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
                                         color: isSelected ? _NC.orange : const Color(0xFF383838),
                                       ),
@@ -678,11 +711,11 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
                                       fillColor: const Color(0xFF262626),
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(14),
                                         borderSide: const BorderSide(color: Color(0xFF383838)),
                                       ),
                                       enabledBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(14),
                                         borderSide: const BorderSide(color: Color(0xFF383838)),
                                       ),
                                     ),
@@ -712,7 +745,7 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
                                   padding: const EdgeInsets.symmetric(horizontal: 12),
                                   decoration: BoxDecoration(
                                     color: _NC.orange.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(14),
                                     border: Border.all(color: _NC.orange.withOpacity(0.5)),
                                   ),
                                   child: Center(
@@ -1014,14 +1047,10 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
           Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: _NC.surface,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(18),
-                topRight: Radius.circular(18),
-                bottomRight: Radius.circular(18),
-                bottomLeft: Radius.circular(4),
-              ),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _NC.borderThin, width: 1),
             ),
             child: _ThinkingDots(controller: _dotCtrl),
           ),
@@ -1102,14 +1131,14 @@ class _VoidNeuralChatScreenState extends State<VoidNeuralChatScreen>
             Container(
               decoration: BoxDecoration(
                 color: _NC.surface,
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(26),
                 border: Border.all(
-                  color: _NC.orange,
+                  color: _hasText ? _NC.orange.withOpacity(0.65) : const Color(0xFF2C2C30),
                   width: 1.0,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: _NC.orange.withOpacity(0.08),
+                    color: _hasText ? _NC.orange.withOpacity(0.08) : Colors.black.withOpacity(0.18),
                     blurRadius: 16,
                     spreadRadius: 0,
                   ),
@@ -1332,7 +1361,7 @@ class _EngineSelectorPill extends StatelessWidget {
   }
 }
 
-/// Circular user avatar with orange background and initial letter.
+/// Circular user avatar with subtle dark background, orange ring and initial letter.
 class _UserAvatar extends StatelessWidget {
   final String initial;
 
@@ -1341,18 +1370,22 @@ class _UserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 34,
-      height: 34,
-      decoration: const BoxDecoration(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
         color: _NC.avatarBg,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: _NC.orange.withOpacity(0.45),
+          width: 1.2,
+        ),
       ),
       child: Center(
         child: Text(
           initial.toUpperCase(),
           style: GoogleFonts.inter(
             color: _NC.white,
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: FontWeight.w700,
             height: 1,
           ),
@@ -1362,7 +1395,7 @@ class _UserAvatar extends StatelessWidget {
   }
 }
 
-/// Suggestion chip on the empty-state canvas.
+/// Suggestion chip on the empty-state canvas — smooth rounded pill.
 class _SuggestionChip extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1380,16 +1413,16 @@ class _SuggestionChip extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(20),
         splashColor: _NC.orange.withOpacity(0.12),
         highlightColor: _NC.orange.withOpacity(0.06),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             color: _NC.surface,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: const Color(0xFF3A3A3A),
+              color: const Color(0xFF343438),
               width: 1,
             ),
           ),
@@ -1480,17 +1513,14 @@ class _MessageBubble extends StatelessWidget {
                         horizontal: 14, vertical: 11),
                     decoration: BoxDecoration(
                       color: _isUser
-                          ? _NC.orange
+                          ? const Color(0xFF221C18)
                           : _NC.surface,
-                      borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(18),
-                        topRight: const Radius.circular(18),
-                        bottomLeft: _isUser
-                            ? const Radius.circular(18)
-                            : const Radius.circular(4),
-                        bottomRight: _isUser
-                            ? const Radius.circular(4)
-                            : const Radius.circular(18),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: _isUser
+                            ? _NC.orange.withOpacity(0.35)
+                            : _NC.borderThin,
+                        width: 1.0,
                       ),
                     ),
                     child: message.isStreaming && message.text.isEmpty
@@ -1641,7 +1671,7 @@ class _SkillBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: _NC.orange.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: _NC.orange.withOpacity(0.25),
           width: 1,
@@ -1778,12 +1808,18 @@ class _SendButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: canSend
               ? _NC.orange
-              : _NC.orange.withOpacity(0.28),
+              : const Color(0xFF28282D),
           shape: BoxShape.circle,
+          border: Border.all(
+            color: canSend
+                ? _NC.orange
+                : const Color(0xFF38383E),
+            width: 1,
+          ),
           boxShadow: canSend
               ? [
                   BoxShadow(
-                    color: _NC.orange.withOpacity(0.4),
+                    color: _NC.orange.withOpacity(0.35),
                     blurRadius: 10,
                     spreadRadius: 0,
                   )
@@ -1801,9 +1837,9 @@ class _SendButton extends StatelessWidget {
                         AlwaysStoppedAnimation<Color>(_NC.white),
                   ),
                 )
-              : const Icon(
+              : Icon(
                   Icons.arrow_upward_rounded,
-                  color: _NC.white,
+                  color: canSend ? _NC.white : _NC.grey,
                   size: 20,
                 ),
         ),

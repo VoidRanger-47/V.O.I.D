@@ -15,7 +15,7 @@ class CyberCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.borderColor,
     this.backgroundColor,
-    this.borderRadius = 10,
+    this.borderRadius = 16,
     this.onTap,
     bool showGlow = false, // kept for backward compatibility, shadows removed
   });

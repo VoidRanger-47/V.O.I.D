@@ -107,14 +107,30 @@ class _StartupSequenceState extends State<StartupSequence> with SingleTickerProv
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Image.asset(
+                                        'assets/images/void_symbol.png',
+                                        width: isMobile ? 36 : 46,
+                                        height: isMobile ? 36 : 46,
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (_, __, ___) => const Icon(
+                                          Icons.blur_on,
+                                          color: VoidTokens.voidOrange,
+                                          size: 36,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
                                     Text(
                                       'V.O.I.D.',
                                       style: VoidTheme.hudLabel(
-                                        fontSize: isMobile ? 14 : 16,
+                                        fontSize: isMobile ? 12 : 14,
                                         fontWeight: FontWeight.w900,
-                                        letterSpacing: 3.0,
+                                        letterSpacing: 2.5,
                                       ),
                                     ),
+                                    const SizedBox(height: 2),
                                     Text(
                                       '${((_step / _steps.length) * 100).toInt()}%',
                                       style: VoidTheme.mono(
@@ -131,7 +147,30 @@ class _StartupSequenceState extends State<StartupSequence> with SingleTickerProv
                         ),
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 18),
+
+                      // Purpose & Studio Title
+                      Text(
+                        'V.O.I.D. STUDIO COCKPIT',
+                        style: VoidTheme.hudLabel(
+                          fontSize: isMobile ? 14 : 16,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2.5,
+                          color: VoidTokens.voidOrangeBright,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'AUTONOMOUS AI ENGINEERING & NEURAL OPERATIONS CENTER',
+                        textAlign: TextAlign.center,
+                        style: VoidTheme.mono(
+                          fontSize: isMobile ? 8.5 : 9.5,
+                          color: VoidTokens.textMuted,
+                          letterSpacing: 1.0,
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
 
                       // Sequential Telemetry Terminal Box
                       ConstrainedBox(

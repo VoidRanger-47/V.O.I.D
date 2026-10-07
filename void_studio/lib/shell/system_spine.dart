@@ -116,32 +116,58 @@ class _SystemSpineState extends State<SystemSpine> {
         ),
         child: Column(
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // Top Spine Coordinate Tag
-            if (_isHovered)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                child: Row(
-                  children: [
-                    Text(
-                      '// SYSTEM SPINE',
-                      style: VoidTheme.hudLabel(fontSize: 8.5, color: VoidTokens.textMuted),
-                    ),
-                    const Spacer(),
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
+            // Official V.O.I.D. Studio Main Logo & Brand Mark
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: Image.asset(
+                      'assets/images/void_symbol.png',
+                      width: 26,
+                      height: 26,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const Icon(
+                        Icons.blur_on,
                         color: VoidTokens.voidOrange,
-                        shape: BoxShape.circle,
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  if (_isHovered) ...[
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'V.O.I.D. STUDIO',
+                            style: VoidTheme.hudLabel(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w800,
+                              color: VoidTokens.voidOrangeBright,
+                            ),
+                          ),
+                          Text(
+                            'COGNITIVE COCKPIT',
+                            style: VoidTheme.mono(
+                              fontSize: 7.5,
+                              color: VoidTokens.textMuted,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                ),
+                ],
               ),
+            ),
 
-            const SizedBox(height: 6),
+            const Divider(color: VoidTokens.voidSurfaceBorder, height: 12),
 
             // Navigation Items
             Expanded(

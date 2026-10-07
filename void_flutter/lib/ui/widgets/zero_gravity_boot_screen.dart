@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// **Phase 1 — Magnetic Snap** (0.0s – 0.6s):
 ///   The logo rapidly pulls into frame from an off-axis zero-g state
 ///   (initial scale 0.7x, rotation -12 degrees, opacity 0.0) snapping firmly
-///   into 1.0x scale and 0.0 degrees alignment via [Curves.easeOutBack].
+///   into 1.0x scale and 0.0 degrees alignment via [Curves.easeOutCubic] (no bounce).
 ///
 /// **Phase 2 — Weightless Drift** (0.6s – 1.5s):
 ///   Immediately upon snapping, the emblem enters an ambient weightless state.
@@ -48,9 +48,9 @@ class _VoidBootScreenState extends State<VoidBootScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
-  static const Color _neonOrange = Color(0xFFFF5F15);
+  static const Color _neonOrange = Color(0xFFFF5500);
   static const Color _electricGold = Color(0xFFFFD54F);
-  static const Color _pureBlack = Color(0xFF000000);
+  static const Color _pureBlack = Color(0xFF0F0F11);
 
   // Time boundary: Phase 1 ends at 0.6s out of 1.5s (0.4 normalized)
   static const double _snapEnd = 0.40;
@@ -91,9 +91,9 @@ class _VoidBootScreenState extends State<VoidBootScreen>
 
           // ── Phase 1: Magnetic Snap (0.0s – 0.6s, t: 0.0 -> _snapEnd) ──
           final double snapProgress = (t / _snapEnd).clamp(0.0, 1.0);
-          final double snapCurveValue = Curves.easeOutBack.transform(snapProgress);
+          final double snapCurveValue = Curves.easeOutCubic.transform(snapProgress);
 
-          // Scale: 0.7x -> 1.0x with snappy easeOutBack overshoot
+          // Scale: 0.7x -> 1.0x with smooth easeOutCubic (no bounce)
           final double scale = t <= _snapEnd
               ? 0.7 + (1.0 - 0.7) * snapCurveValue
               : 1.0;
@@ -109,21 +109,9 @@ class _VoidBootScreenState extends State<VoidBootScreen>
               ? Curves.easeOut.transform((snapProgress / 0.85).clamp(0.0, 1.0))
               : 1.0;
 
-          // ── Phase 2: Weightless Drift (0.6s – 1.5s, t: _snapEnd -> 1.0) ─
-          double floatDy = 0.0;
-          double swayRad = 0.0;
-
-          if (t > _snapEnd) {
-            final double driftProgress =
-                ((t - _snapEnd) / (1.0 - _snapEnd)).clamp(0.0, 1.0);
-
-            // Exactly sin(progress * 2 * pi): starts at 0, floats ±4px, ends at 0
-            final double driftSine = math.sin(driftProgress * 2.0 * math.pi);
-            floatDy = driftSine * 4.0; // ±4 px vertical float
-            swayRad = driftSine * (1.0 * math.pi / 180.0); // ±1.0° micro-sway
-          }
-
-          final double totalRotation = snapRotation + swayRad;
+          // ── Phase 2: Steady Lock (0.6s – 1.5s, t: _snapEnd -> 1.0) ─
+          // Clean, stable lock-in without bounce oscillation
+          final double totalRotation = snapRotation;
 
           // ── Phase 3: High-Energy Pulse & Bloom ────────────────────────
           double bloomIntensity;
@@ -191,7 +179,7 @@ class _VoidBootScreenState extends State<VoidBootScreen>
 
               // ── The Floating Emblem (Unified Transform Hierarchy) ──────
               Transform.translate(
-                offset: Offset(0, floatDy),
+                offset: Offset.zero,
                 child: Transform.rotate(
                   angle: totalRotation,
                   child: Transform.scale(
