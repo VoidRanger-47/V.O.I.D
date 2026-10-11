@@ -69,7 +69,7 @@ When executing complex developer objectives, V.O.I.D. decomposes user goals into
    ├── [COORDINATOR]        Dispatching Task 3 to VerificationAgent...
    │     └─ [VERIFY AGENT]  ✔ Automated Test Suite: 16/16 PASSED (Verdict: PASS)
    │
-[EXECUTIVE CORE] ──▶ Output Synthesized & Verified (Total Latency: 210ms)
+[EXECUTIVE CORE] ──▶ Output Synthesized & Verified (Total Latency: 850ms)
 
 [V.O.I.D.] » Operations complete: Disk headroom confirmed (142GB free), database indices 
              optimized in 48ms, and verification suite passed with zero regressions.
