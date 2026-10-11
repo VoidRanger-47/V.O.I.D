@@ -32,17 +32,27 @@
 
 ## 👁️ Visual Proof & Interfaces
 
-### 1. Live Optical Perception & Neural Telemetry Cockpit
-V.O.I.D. includes an onboard computer vision perception pipeline running at a synchronized **30.0 FPS** (with an average inference latency of **14.2 ms/frame** on CUDA fp16). Powered by an open-vocabulary object model (`yolov8s-worldv2.pt`), it continuously extracts spatial geometry, 3D liveness, attention index, and attire signatures with 100% on-device inference:
+### 1. Neural Cognitive OS & Interactive Dashboard
+V.O.I.D. boots into an autonomous, dark-mode native interface (`100% Local Engine • Zero Cloud Required`) providing direct access to the Studio Cockpit, Vision HUD, Desktop Automation, and Hardware Monitors:
 
 <div align="center">
-  <img src="docs/assets/void-vision-dashboard.png" alt="V.O.I.D. Live Optical Viewport and Neural Perception Cockpit" width="95%" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6);" />
-  <p><em>Figure 1: V.O.I.D. Perception Interface — Real-time Optical Viewport, Spatial Geometry, Cognitive Attire Dossier, and Neural Object Tracking.</em></p>
+  <img src="docs/assets/void-neural-interface.png" alt="V.O.I.D. Neural Cognitive OS & Interactive Dashboard" width="95%" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6);" />
+  <p><em>Figure 1: V.O.I.D. Neural Cognitive OS — Offline Neural Model Active, Studio Cockpit launcher, Quick Actions, and Tool Navigation.</em></p>
 </div>
 
 <br/>
 
-### 2. Multi-Agent Routing Lifecycle *(Illustrative Trace Example)*
+### 2. Live Optical Perception & Neural Telemetry Cockpit
+V.O.I.D. includes an onboard computer vision perception pipeline running at a synchronized **30.0 FPS** (with an average inference latency of **14.2 ms/frame** on CUDA fp16). Powered by an open-vocabulary object model (`yolov8s-worldv2.pt`), it continuously extracts spatial geometry, 3D liveness, attention index, and attire signatures with 100% on-device inference:
+
+<div align="center">
+  <img src="docs/assets/void-vision-dashboard.png" alt="V.O.I.D. Live Optical Viewport and Neural Perception Cockpit" width="95%" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6);" />
+  <p><em>Figure 2: V.O.I.D. Perception Interface — Real-time Optical Viewport, Spatial Geometry, Cognitive Attire Dossier, and Neural Object Tracking.</em></p>
+</div>
+
+<br/>
+
+### 3. Multi-Agent Routing Lifecycle *(Illustrative Trace Example)*
 When decomposing complex developer goals, V.O.I.D. constructs a Directed Acyclic Graph (DAG) across specialized agents, verifies code guardrails, dispatches zero-LLM agents for deterministic operations, and evaluates independent verification before output delivery:
 
 ```text
