@@ -73,13 +73,19 @@ weights/
 vision/data/models/
 void_memory/models/
 
-# Local Runtime Databases & Ephemeral Logs
+# Local Runtime Databases, Memory Logs & Ephemeral Files
 *.db
 *.sqlite3
 logs/
 scratch/
 .void_desktop_profile/
 training_state.json
+nlp_memory.jsonl
+nlp_memory*.jsonl
+*.wav
+*.mp3
+*.ogg
+void_output.wav
 
 # Node.js & Web Artifacts
 node_modules/

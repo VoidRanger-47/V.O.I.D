@@ -15,12 +15,13 @@ V.O.I.D. enforces granular permission levels before executing any tool or comman
 
 ---
 
-## 2. Python AST Sandbox
-Unrestricted `exec()` and `eval()` are strictly banned.
-Python code submitted to `python_interpreter` is evaluated by `core.security.SecurityManager`:
-1. **Static AST Analysis**: Verifies that no forbidden functions (`os.system`, `subprocess.Popen`, `shutil.rmtree`, `__import__`, `eval`) or network modules (`socket`, `requests`, `urllib`) are present.
-2. **Restricted Built-ins**: Code runs inside a restricted global namespace with a safe import proxy allowing only mathematical, data-science, and algorithmic standard libraries (`math`, `random`, `re`, `time`, `datetime`, `json`, `collections`, `itertools`, `numpy`, `sympy`).
-3. **Execution Constraints**: Sandboxed snippets have execution timeouts and output buffer truncation.
+## 2. Python AST Execution Guardrail
+Unrestricted `exec()` and `eval()` are banned. Python code submitted to `python_interpreter` is evaluated by `core.security.SecurityManager` as an application-level **defense-in-depth guardrail**:
+1. **Static AST Analysis**: Statically parses candidate code to verify that common dangerous functions (`os.system`, `subprocess.Popen`, `shutil.rmtree`, `__import__`, `eval`) or network modules (`socket`, `requests`, `urllib`) are not referenced.
+2. **Restricted Built-ins**: Code executes with a restricted global namespace proxy permitting only safe mathematical and data-science libraries (`math`, `random`, `re`, `time`, `datetime`, `json`, `collections`, `itertools`, `numpy`, `sympy`).
+3. **Execution Constraints**: Snippets are executed with strict timeouts and output buffer truncation.
+
+> **Security Advisory**: Static AST blocklists are application guardrails and can theoretically be bypassed via dynamic reflection or obscure Python runtime internals. They do not constitute hard operating system isolation. For adversarial or untrusted third-party code execution, deploy V.O.I.D. inside an OS container (Docker/Podman) with strict `cgroups`/`rlimits` or a dedicated microVM (gVisor/Firecracker).
 
 ---
 

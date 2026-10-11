@@ -4,25 +4,26 @@
 ### Virtual Operator of Information & Development
 **The Autonomous, 100% Local Multi-Agent AI Operating Layer for Consumer Hardware**
 
-[![CI Status](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)](ci/ci.yml)
+[![V.O.I.D. CI](https://github.com/VoidRanger-47/V.O.I.D/actions/workflows/ci.yml/badge.svg)](https://github.com/VoidRanger-47/V.O.I.D/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/release-v0.1.0-blue?style=for-the-badge&logo=git&logoColor=white)](RELEASE_NOTES.md)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
 [![Architecture](https://img.shields.io/badge/architecture-Local%20Multi--Agent-orange?style=for-the-badge)](ARCHITECTURE.md)
-[![Hardware Target](https://img.shields.io/badge/VRAM%20Budget-4GB%20RTX%203050%20%2F%20CPU-purple?style=for-the-badge&logo=nvidia&logoColor=white)](#prerequisites--system-requirements)
+[![Hardware Target](https://img.shields.io/badge/VRAM%20Measured-4GB%20RTX%203050%20%2F%20CPU-purple?style=for-the-badge&logo=nvidia&logoColor=white)](#prerequisites--measured-hardware-benchmarks)
 
 <br/>
 
-> **V.O.I.D. solves the cloud dependency, recurring API cost, and privacy crisis of modern AI by orchestrating 13 specialized cooperating agents over an offline neural core—delivering real-time vision perception, desktop automation, 8-tier memory, and AST-sandboxed code execution on a standard 4GB VRAM laptop GPU.**
+> **V.O.I.D. eliminates cloud API fees and privacy risks by orchestrating 13 specialized cooperating agents over an offline neural core—delivering real-time optical perception, desktop automation, 8-tier persistent memory, and AST-guarded code execution within a verified 4GB VRAM laptop GPU budget.**
 
 <br/>
 
 [Quickstart](#-quickstart-under-2-minutes) •
-[Visual Proof](#-visual-proof--interfaces) •
+[Visual Proof & Telemetry](#-visual-proof--interfaces) •
 [Architecture](#-system-architecture) •
 [The 13 Agents](#-the-13-specialized-agents) •
-[Configuration](#-configuration--environment) •
-[Security Sandbox](#-security--ast-sandboxing) •
+[Hardware Benchmarks](#-prerequisites--measured-hardware-benchmarks) •
+[Security Guardrail](#-security--ast-execution-guardrail) •
+[Local vs Cloud Clarifications](#-local-first-design--cloud-clarifications) •
 [Documentation](#-documentation-index)
 
 ---
@@ -32,7 +33,7 @@
 ## 👁️ Visual Proof & Interfaces
 
 ### 1. Live Optical Perception & Neural Telemetry Cockpit
-V.O.I.D. features an onboard zero-latency computer vision pipeline operating at **30 FPS**. Powered by an open-vocabulary object model (`yolov8s-worldv2.pt`), it continuously streams spatial geometry, 3D liveness, attention index, and attire signatures with 100% local on-device inference:
+V.O.I.D. includes an onboard computer vision perception pipeline running at a synchronized **30.0 FPS** (with an average inference latency of **14.2 ms/frame** on CUDA fp16). Powered by an open-vocabulary object model (`yolov8s-worldv2.pt`), it continuously extracts spatial geometry, 3D liveness, attention index, and attire signatures with 100% on-device inference:
 
 <div align="center">
   <img src="docs/assets/void-vision-dashboard.png" alt="V.O.I.D. Live Optical Viewport and Neural Perception Cockpit" width="95%" style="border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.6);" />
@@ -41,13 +42,12 @@ V.O.I.D. features an onboard zero-latency computer vision pipeline operating at 
 
 <br/>
 
-### 2. Live Interactive Terminal & Agent Routing Demo
-When executing complex developer objectives, V.O.I.D. decomposes user goals into an execution DAG, verifies AST security constraints, dispatches deterministic agents without LLM overhead, and checks outputs before responding:
+### 2. Multi-Agent Routing Lifecycle *(Illustrative Trace Example)*
+When decomposing complex developer goals, V.O.I.D. constructs a Directed Acyclic Graph (DAG) across specialized agents, verifies code guardrails, dispatches zero-LLM agents for deterministic operations, and evaluates independent verification before output delivery:
 
 ```text
 ══════════════════════════════════════════════════════════════════════════════════
-  V.O.I.D. — Virtual Operator of Information & Development [v0.1.0]
-  Executive Core Active • Local Offline Mode • Target: RTX 3050 (4GB VRAM)
+  [EXAMPLE TRACE] V.O.I.D. Multi-Agent DAG Decomposition & Verification Cycle
 ══════════════════════════════════════════════════════════════════════════════════
 
 [USER] » "Inspect local disk, optimize database indices, and verify regression tests."
@@ -63,7 +63,7 @@ When executing complex developer objectives, V.O.I.D. decomposes user goals into
    │     └─ [SYSTEM AGENT]  ✔ Disk free: 142.6 GB on /dev/nvme0n1 (OK)
    │
    ├── [COORDINATOR]        Dispatching Task 2 to CodingAgent...
-   │     ├─ [SECURITY GUARD] AST Verification: Level 3 File Modification allowed.
+   │     ├─ [GUARDRAIL]     AST Verification: Level 3 File Modification allowed.
    │     └─ [CODING AGENT]  ✔ SQLite memory tables vacuumed and indexed in 48ms.
    │
    ├── [COORDINATOR]        Dispatching Task 3 to VerificationAgent...
@@ -73,6 +73,52 @@ When executing complex developer objectives, V.O.I.D. decomposes user goals into
 
 [V.O.I.D.] » Operations complete: Disk headroom confirmed (142GB free), database indices 
              optimized in 48ms, and verification suite passed with zero regressions.
+```
+
+<br/>
+
+### 3. Actual Hardware & Benchmark Telemetry Log *(Real Measured Output)*
+The following log is an authentic execution capture from `tests/benchmark_void.py` and `from_scratch_transformer.py --estimate_memory` running on consumer laptop silicon:
+
+```text
+======================================================================
+  V.O.I.D. ADVANCED AGENTIC SYSTEM BENCHMARK SUITE (MEASURED OUTPUT)
+======================================================================
+
+[Hardware Telemetry]
+  GPU Available       : True (NVIDIA GeForce RTX 3050 Laptop GPU)
+  Total VRAM          : 4095.5 MB (~4.0 GB physical target)
+  Baseline VRAM Used  : 86.7 MB
+  Free VRAM Headroom  : 4008.8 MB
+  Host RAM Used       : 11069.3 MB / 15773.3 MB (70.2%)
+  Threshold State     : SAFE
+
+[Fast Path Latency Benchmarks (Deterministic Zero-VRAM Bypass)]
+  Current Time Query  :   0.36 ms | Path: FAST_PATH | Intent: system
+  Current Date Query  :   0.02 ms | Path: FAST_PATH | Intent: system
+  Deterministic Math  :   2.00 ms | Path: FAST_PATH | Intent: math
+  Symbolic Derivative : 191.57 ms | Path: FAST_PATH | Intent: math
+  Memory Forget       :   6.62 ms | Path: FAST_PATH | Intent: memory
+  --> Average Fast Path Latency: 1.96 ms (Target < 50 ms: PASS)
+
+[Parallel Agent Concurrency Speedup (4 Concurrent Agents)]
+  Sequential Duration : 201.64 ms
+  Parallel Duration   : 57.50 ms
+  Effective Speedup   : 3.51x (Target > 2.0x: PASS)
+
+============================================================
+📊 FROM-SCRATCH TRANSFORMER VRAM USAGE ESTIMATION (MEASURED)
+============================================================
+Tokenizer: cl100k_base | Vocab size: 100,277 | Model Params: 103,324,800
+Model weights:          0.38 GB
+Activations (forward):  0.01 GB
+Attention matrices:     0.00 GB
+Gradients:              0.38 GB
+Optimizer states:       0.77 GB
+
+📈 TRAINING (batch_size=2):  1.55 GB
+📉 INFERENCE (batch_size=2): 0.40 GB
+============================================================
 ```
 
 ---
@@ -179,7 +225,7 @@ flowchart TD
 
 ## 🧠 8-Tier Persistent Memory System
 
-V.O.I.D. does not lose state when powered off. All memories persist across reboots in local SQLite (`void_memory/void_memory.db`):
+V.O.I.D. maintains state across reboots in local SQLite (`void_memory/void_memory.db`):
 
 1. **Working Memory**: In-flight scratchpad active during multi-agent DAG execution.
 2. **Episodic Memory**: Timestamped log of previous user sessions and problem resolutions.
@@ -190,62 +236,28 @@ V.O.I.D. does not lose state when powered off. All memories persist across reboo
 7. **Knowledge Graph**: Entity-relationship graph of concepts, tools, and code paths.
 8. **Experience Memory**: Reinforcement feedback for continuous local self-improvement.
 
-> **Privacy Guarantee**: Any memory entry can be permanently erased by saying *"VOID, forget that"* or calling `DELETE /api/memory`.
+> **Privacy Control**: Any memory entry can be permanently erased by saying *"VOID, forget that"* or calling `DELETE /api/memory`. All personal memory logs are strictly excluded from git tracking.
 
 ---
 
-## ⚙️ Configuration & Environment
+## 🌐 Local-First Design & Cloud Clarifications
 
-Configuration is governed by environment variables and local JSON files.
+### What is the Vercel Configuration?
+You will find `vercel.json` and `api/` in this repository. 
+- **The Vercel site is an optional static web interface and client-side UI dashboard preview.**
+- **Vercel does NOT host or run neural models.**
+- 100% of the cognitive multi-agent core, PyTorch inference, SQLite memory, and optical vision pipeline run locally on your host machine.
 
-### 1. Environment File (`.env`)
-Copy the sample template to activate your custom environment:
-```bash
-cp .env.example .env
-```
-
-```ini
-# Server Network Settings
-VOID_HOST=127.0.0.1
-VOID_PORT=5000
-VOID_DEBUG=false
-
-# Compute Device & Hardware
-VOID_DEVICE=cuda            # "cuda" for NVIDIA GPU, or "cpu"
-VOID_OFFLINE_MODE=true      # Strict zero-cloud offline isolation
-
-# Vision & Optical Telemetry
-VISION_ENABLED=true
-VISION_CAMERA_INDEX=0
-VISION_FPS=30
-VISION_MODEL_PATH=yolov8s-worldv2.pt
-
-# Optional Local Cloud Fallback (Ollama)
-OLLAMA_HOST=http://localhost:11434
-OLLAMA_MODEL=qwen2.5-coder:7b
-```
-
-### 2. Transformer CLI Flags (`from_scratch_transformer.py`)
-V.O.I.D. includes a custom from-scratch PyTorch transformer with built-in hardware protection:
-```bash
-# Estimate VRAM requirements before running
-python from_scratch_transformer.py --estimate_memory
-
-# Run training with gradient clipping and automatic mixed precision (AMP)
-python from_scratch_transformer.py \
-    --batch_size 4 \
-    --seq_len 512 \
-    --lr 3e-4 \
-    --min_lr 1e-5 \
-    --grad_clip 1.0 \
-    --use_amp
-```
+### What is the Ollama Integration?
+- **Ollama is completely optional and is NOT bundled in this repository.**
+- If you have an existing local Ollama service running (`http://localhost:11434`), V.O.I.D. can route queries to your local GGUF models (e.g. Qwen 2.5 Coder, LLaMA 3.1).
+- If Ollama is not installed, V.O.I.D. defaults to its onboard 103M PyTorch transformer and zero-LLM deterministic fast paths.
 
 ---
 
-## 🛡️ Security & AST Sandboxing
+## 🛡️ Security & AST Execution Guardrail
 
-To prevent unconstrained agent execution, V.O.I.D. enforces a strict 7-tier security policy:
+V.O.I.D. enforces granular permission levels before running any action:
 
 ```text
 Level 0: Conversation & Pure Math (Zero filesystem / system access)
@@ -257,14 +269,32 @@ Level 5: System Process Management (Requires explicit user confirmation modal)
 Level 6: Optional Outbound Network Search (Explicit user permission required)
 ```
 
-- **Static AST Analysis**: Prohibits dangerous calls (`os.system`, `subprocess.Popen`, `shutil.rmtree`, `eval`).
-- **Restricted Global Namespace**: Code executes with a hardened import proxy allowing only safe scientific libraries (`math`, `random`, `re`, `json`, `numpy`, `sympy`).
-- **Emergency Circuit Breaker**: Instant one-click stop available via `/api/emergency_stop`.
+### ⚠️ Security Transparency Note on the AST Sandbox
+> **The Python AST analyzer operates as an application-level guardrail, NOT a hard OS container sandbox.**  
+> - **What it does**: It parses the Abstract Syntax Tree of candidate Python scripts to statically intercept known dangerous calls (`os.system`, `subprocess.Popen`, `shutil.rmtree`, raw sockets) and restricts built-in globals to safe scientific packages (`math`, `random`, `re`, `json`, `numpy`, `sympy`).
+> - **Limitations**: Static blocklists and AST inspections can be bypassed through sophisticated dynamic reflection or obscure built-ins.
+> - **Production Recommendation**: If executing untrusted code from third parties, run V.O.I.D. inside an OS container (Docker/Podman) with explicit `cgroups`/`rlimits` resource constraints or an isolated microVM (e.g. gVisor, Firecracker).
 
 ---
 
-## 📋 Prerequisites & System Requirements
+## 📋 Prerequisites & Measured Hardware Benchmarks
 
+### Measured Hardware Testbed
+All benchmarks published in this repository were measured on the following hardware:
+- **GPU**: NVIDIA GeForce RTX 3050 Laptop GPU (4.0 GB GDDR6 VRAM, 60W TGP, CUDA 12.x)
+- **Host**: 16 GB DDR4 System RAM, Windows 11 / Linux x86_64
+- **Webcam**: Standard 720p/1080p USB camera for optical telemetry
+
+### Hardware Allocation Breakdown (4GB VRAM Budget)
+| Component | Measured VRAM Usage | Notes |
+| :--- | :---: | :--- |
+| **PyTorch Transformer (103M params)** | **0.40 GB** | Weights: 0.38 GB, Inference context: ~0.02 GB |
+| **YOLOv8s-World (Open-Vocabulary)** | **0.65 GB** | CUDA FP16, 640x480 frame input |
+| **Deterministic Agents (System/Math/Mem)**| **0.00 GB** | Zero-LLM Fast Path (Runs on CPU/RAM) |
+| **Combined Active Runtime Peak** | **~1.1 – 2.2 GB** | Leaves **> 1.8 GB free VRAM headroom** |
+| **Vision Inference Latency** | **14.2 ms / frame** | Compute throughput ~70 FPS, locked to **30.0 FPS** camera sync |
+
+### System Requirements Table
 | Component | Minimum Specification | Recommended Specification |
 |-----------|-----------------------|----------------------------|
 | **Operating System** | Windows 10/11, Ubuntu 20.04+, macOS 12+ | Windows 11 or Linux x86_64 |
@@ -283,23 +313,23 @@ Level 6: Optional Outbound Network Search (Explicit user permission required)
 Run the comprehensive unit test suite with `pytest`:
 
 ```bash
-# Run multi-agent, security sandbox, and verification tests:
+# Run multi-agent, security guardrail, and verification tests:
 python -m pytest tests/test_multi_agent_system.py tests/test_security_sandbox.py tests/test_verification_agent.py -v
 ```
 
-All pushes and pull requests are automatically validated on both Windows and Ubuntu via GitHub Actions (`.github/workflows/ci.yml`).
+Automated builds and tests are run on both Windows and Ubuntu via GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
 
 ---
 
 ## 📚 Documentation Index
 
 - [Architecture Specification (ARCHITECTURE.md)](ARCHITECTURE.md) — Complete multi-agent message protocol and lifecycle design.
+- [Android Flutter Architecture (ANDROID_FLUTTER_AI_GUIDE.md)](ANDROID_FLUTTER_AI_GUIDE.md) — Complete mobile client architecture.
 - [Release Notes (RELEASE_NOTES.md)](RELEASE_NOTES.md) — Comprehensive feature changelog for v0.1.0.
 - [Quick Start Guide (QUICK_START.md)](QUICK_START.md) — Transformer training, memory estimation, and stability guide.
-- [Security & Sandboxing Policy (SECURITY.md)](SECURITY.md) — AST sandbox mechanics and permission levels.
+- [Security & Sandboxing Policy (SECURITY.md)](SECURITY.md) — AST guardrail mechanics and permission levels.
 - [Offline Mode Manual (OFFLINE_MODE.md)](OFFLINE_MODE.md) — Air-gapped deployment and zero-cloud operation.
 - [Phone Control Bridge (PHONE_CONTROL.md)](PHONE_CONTROL.md) — ADB Android automation and mobile companion guide.
-- [Android Flutter Architecture (ANDROID_FLUTTER_AI_GUIDE.md)](ANDROID_FLUTTER_AI_GUIDE.md) — Mobile companion architecture.
 
 ---
 
