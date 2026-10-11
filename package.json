@@ -1,8 +1,20 @@
 {
   "name": "void-web",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "V.O.I.D. — Virtual Operator of Information & Development Web Interface",
+  "keywords": [
+    "local-ai",
+    "multi-agent-systems",
+    "autonomous-agents",
+    "offline-ai",
+    "computer-vision",
+    "voice-assistant",
+    "python",
+    "yolov8",
+    "developer-tools",
+    "pytorch"
+  ],
   "scripts": {
     "dev": "serve public",
     "start": "serve public",

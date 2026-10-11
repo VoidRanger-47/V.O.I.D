@@ -1,0 +1,40 @@
+# ==============================================================================
+# V.O.I.D. — Core Dependencies Specification
+# ==============================================================================
+
+# Core Deep Learning & Tokenization
+torch>=2.0.0
+tiktoken>=0.5.0
+
+# Web Application & Local REST API Server
+flask>=2.3.0
+requests>=2.31.0
+
+# Numerical Computing & Symbolic Mathematics
+numpy>=1.24.0
+sympy>=1.12.0
+
+# Hardware Telemetry & System Monitoring
+psutil>=5.9.0
+
+# Image Processing & Brand Utilities
+pillow>=9.5.0
+
+# Optional: Real-time Vision & Object Tracking (YOLOv8-World)
+# Uncomment below if running the optical vision telemetry engine:
+opencv-python>=4.8.0
+ultralytics>=8.0.0
+
+# Optional: Local Offline Voice Engine (Faster-Whisper STT & Piper TTS)
+# Uncomment below if using the offline acoustic wake-word pipeline:
+# faster-whisper>=0.10.0
+# sounddevice>=0.4.6
+# scipy>=1.11.0
+
+# Optional: Advanced Semantic Vector Search & Local RAG
+# Uncomment below for persistent vector embeddings:
+# sentence-transformers>=2.2.0
+# chromadb>=0.4.0
+
+# Development, Quality & Test Runner
+pytest>=7.4.0

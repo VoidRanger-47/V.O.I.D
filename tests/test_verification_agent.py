@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from core.agents.coordinator import agent_coordinator
 from core.agents.protocol import AgentMessage
+import core.agents.network
 
 class TestVerificationAgent(unittest.TestCase):
     def setUp(self):
